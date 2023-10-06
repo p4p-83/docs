@@ -1,0 +1,4 @@
+#/bin/zsh
+
+pandoc -o demo.pdf demo.md
+open demo.pdf
