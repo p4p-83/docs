@@ -1,16 +1,16 @@
 {
   "settings": {
     "migrated": 3,
-    "iconPacksPath": ".obsidian/plugins/obsidian-icon-folder/icons",
+    "iconPacksPath": ".obsidian/icons",
     "fontSize": 16,
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "TiNotes",
+      "TiNote",
       "TiBrowser",
       "TiSchool",
-      "TiSquare4Filled",
-      "TiVirusOff",
-      "TiArchiveFilled"
+      "TiSquare4Filled"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
@@ -53,7 +53,6 @@
     "iconName": "TiBrandApple",
     "inheritanceIcon": "TiBrandApple"
   },
-  "! Part IV Project.md": "TiSchool",
   "0 — attachments": {
     "iconName": "TiPaperclip",
     "inheritanceIcon": "TiPaperclip"
@@ -69,5 +68,7 @@
   "9 — static": {
     "iconName": "TiBrowser",
     "inheritanceIcon": "TiBrowser"
-  }
+  },
+  "! Part IV Project.md": "TiSchool",
+  "README.md": "TiNotes"
 }
