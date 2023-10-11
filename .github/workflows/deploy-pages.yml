@@ -1,0 +1,48 @@
+name: Deploy Pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  push:
+    paths:
+    - 'docs/9 — static/**'
+    - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+    
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+
+  deploy:
+    environment:
+      name: docs
+      url: ${{ steps.deployment.outputs.page_url }}
+        
+    defaults:
+      run:
+        working-directory: docs/9 — static
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        
+      - shell: bash
+        run: |
+          # * rename main page to index
+          mv !-part-iv-project.html index.html
+          find ./ -type f | xargs sed -i 's/!-part-iv-project.html/index.html/g'
+          
+      - uses: actions/configure-pages@v3
+
+      - uses: actions/upload-pages-artifact@v2
+        with:
+          path: docs/9 — static
+
+      - uses: actions/deploy-pages@v2
+        id: deployment
