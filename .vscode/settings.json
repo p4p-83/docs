@@ -1,6 +1,7 @@
 {
 	"conventionalCommits.scopes": [
 		"assets",
-		"gitignore"
+		"gitignore",
+		"obsidian"
 	]
 }

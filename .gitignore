@@ -46,3 +46,18 @@ OldVersions/
 
 ## Ignore temporary files
 *.tmp
+
+## Ignore Obsidian vault files
+/docs/.obsidian/*
+
+### Allow icon plugin configuration
+!/docs/.obsidian/plugins/
+/docs/.obsidian/plugins/*
+!/docs/.obsidian/plugins/obsidian-icon-folder
+/docs/.obsidian/plugins/obsidian-icon-folder/*.*
+!/docs/.obsidian/plugins/obsidian-icon-folder/data.json
+
+### Allow custom CSS snippets
+!/docs/.obsidian/snippets
+
+.trash/
