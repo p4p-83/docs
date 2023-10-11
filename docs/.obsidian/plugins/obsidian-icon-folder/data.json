@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "TiSpeakerphone",
+      "TiFileTypePdf",
+      "TiSourceCode",
       "TiBookmarks",
-      "TiNotes",
-      "TiNote",
-      "TiBrowser",
-      "TiSchool"
+      "TiNotes"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
@@ -74,5 +74,13 @@
   "2 — references": {
     "iconName": "TiBookmarks",
     "inheritanceIcon": "TiBookmarks"
+  },
+  "3 — latex": {
+    "iconName": "TiFileTypePdf",
+    "inheritanceIcon": "TiFileTypePdf"
+  },
+  "3 — latex/pitch": {
+    "iconName": "TiSpeakerphone",
+    "inheritanceIcon": "TiSpeakerphone"
   }
 }
