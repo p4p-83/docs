@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "TiBookmarks",
       "TiNotes",
       "TiNote",
       "TiBrowser",
-      "TiSchool",
-      "TiSquare4Filled"
+      "TiSchool"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
@@ -70,5 +70,9 @@
     "inheritanceIcon": "TiBrowser"
   },
   "! Part IV Project.md": "TiSchool",
-  "README.md": "TiNotes"
+  "README.md": "TiNotes",
+  "2 — references": {
+    "iconName": "TiBookmarks",
+    "inheritanceIcon": "TiBookmarks"
+  }
 }
