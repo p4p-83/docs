@@ -27,7 +27,7 @@ The goal of such a machine is to empower hardware engineers to prototype efficie
 \section{The Problem}
 
 Existing pick-and-place machines are cumbersome and entirely impractical for rapid prototyping.
-Pick-and-place machines are designed for high-volume manufacturing—\emph{once programmed}, existing machines are designed to churn out populated printed circuit boards—placing components by the hundreds of thousands per hour \cite{cite:ztar-ysm40r} with extreme efficiency.
+Pick-and-place machines are designed for high-volume manufacturing—\emph{once programmed}, existing machines are designed to churn out populated printed circuit boards, placing components by the hundreds of thousands per hour \cite{cite:ztar-ysm40r} with extreme efficiency.
 
 Within the context of rapid prototyping, this operating profile is untenable.
 An engineer enveloped within a prototyping stage of development desires a machine with zero setup that can be used immediately—such a context demands low-setup overhead and processes optimised for low volumes, perhaps a handful of boards for any singular revision.
@@ -38,25 +38,25 @@ These are fantastically versatile when assembling at-scale, but engineers scarce
 These loose components are wholly unsupported by industrial pick-and-place machines in the worst case, or severely inhibit performance and balloon operating costs in the best case.
 
 For many engineers, this creates an impasse—many engineers struggle to work with the increasingly-smaller packages in which modern electronic devices are available.
-Some find even 'standard' \texttt{0603} components challenging, let alone small \texttt{0402} packages and miniscule \texttt{0201} devices.
+Some find even `standard' \texttt{0603} components challenging, let alone small \texttt{0402} packages or miniscule \texttt{0201} devices.
 This discussion would not be complete without a similar acknowledgement of fine-pitch integrated circuits, or packages with no iron-solderable pads—ball grid array (BGA) or quad-flat no-lead (QFN) devices often cause limitless headaches for inexperienced engineers, or those with degraded fine-motor skills.
 
 The \emph{inaccessibility} of these components renders many electronic components non-prototype-able for many engineers, who are left with only those part numbers also available in larger, easier-to-handle packages.
-This is a thoroughly imperfect solution, as many modern integrated circuits are simply not produced in more 'accessible' packages, or parasitic, layout, or package-variation issues eventuate in ineffective prototypes that \emph{cannot} accurately model real production results.
+This is a thoroughly imperfect solution, as many modern integrated circuits are simply not produced in more `accessible' packages, or parasitic, layout, or package-variation issues eventuate in ineffective prototypes that \emph{cannot} accurately model real production results.
 
 \emph{What if we could design a manually-operated pick-and-place machine with zero setup, specifically tailored for rapid prototyping?}
 Of specific research interest is the potential application of computer vision to augment such a machine, in such a manner to elevate the user experience.
-Critically, however, any 'intelligent' features should \emph{not} incite any additional setup cost.
+Critically, however, any `intelligent' features should \emph{not} incite any additional setup cost.
 
 \section{The Outcome}
 
 Whilst the full implementation of such a machine would be the ideal outcome of our Part IV project, we must be cautious to temper expectations and to be pragmatic about practicalities.
-The intention is thus to tackle this project in a series of 'stages', with each sequential stage representing some increase in complexity and implementation difficulty whilst prioritising key research focusses above all else—ultimately, this is a \emph{research} project.
+The intention is thus to tackle this project in a series of `stages', with each sequential stage representing some increase in complexity and implementation difficulty whilst prioritising key research focusses above all else—ultimately, this is a \emph{research} project.
 
 Therefore, this project is to comprise of the following component parts, each represented by a focussing question:
 \begin{enumerate}
-	\item How can we circumvent visual occlusions caused by the nozzle, such that the user maintains a clear view of the board at all times?
-	\item How can we intelligently locate ('snap') a component to its respective pads, regardless of the presence of applied solder paste?
+	\item How can we circumvent visual occlusions caused by the nozzle, such that the user retains a clear view of the board at all times?
+	\item How can we intelligently locate (`snap') a component to its respective pads, regardless of the presence of applied solder paste?
 	\item Is it feasible to apply solder paste directly with the machine? If so, does this produce \emph{better} system performance than pre-applied paste?
 	\item How can we identify the optimal location at which to pick up a component?
 	\item Is there a need or benefit to an increase in the degrees of freedom of the head?
