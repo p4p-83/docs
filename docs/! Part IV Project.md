@@ -4,6 +4,9 @@
 
 James Bao and Sam Skinner
 
+> [!note]
+> View the $\LaTeX$ copy of this pitch at [[pitch.pdf]].
+
 ## Elevator Pitch
 
 > [!summary] Elevator Pitch
