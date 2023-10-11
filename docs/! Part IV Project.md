@@ -6,11 +6,13 @@ James Bao and Sam Skinner
 
 ## Elevator Pitch
 
-Existing pick-and-place machines are wholly impractical for rapid prototyping. This project aims to implement a computer vision-augmented, zero-setup pick-and-place designed *for* prototyping. The goal of such a machine is to empower hardware engineers to prototype efficiently with a wider range of electronic components than they may otherwise be capable of without machine assistance.
+> [!summary] Elevator Pitch
+> Existing pick-and-place machines are wholly impractical for rapid prototyping. This project aims to implement a computer vision-augmented, zero-setup pick-and-place designed *for* prototyping. The goal of such a machine is to empower hardware engineers to prototype efficiently with a wider range of electronic components than they may otherwise be capable of without machine assistance.
 
 ### The research question
 
-*How could computer vision be employed to augment the design of a zero-setup pick-and-place machine tailored for rapid prototyping?*
+> [!question]
+> *How could computer vision be employed to augment the design of a zero-setup pick-and-place machine tailored for rapid prototyping?*
 
 ## The Problem
 
