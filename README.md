@@ -1,7 +1,3 @@
-<div align="center">
-   <img src="assets/p4p.png" width="15%">
-</div>
-
 # Part IV Project
 
 > :bulb: How could Computer Vision be employed to augment the design of a zero-setup pick-and-place machine tailored for rapid prototyping?
