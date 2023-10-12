@@ -5,7 +5,7 @@
 James Bao and Sam Skinner
 
 > [!note]
-> View the $\LaTeX$ copy of this pitch at [[pitch.pdf]].
+> View the $\LaTeX$-rendered copy of this pitch at [[pitch.pdf]].
 
 ## Elevator Pitch
 
@@ -21,11 +21,7 @@ James Bao and Sam Skinner
 
 Existing pick-and-place machines are cumbersome and entirely impractical for rapid prototyping. Pick-and-place machines are designed for high-volume manufacturing—*once programmed*, existing machines are designed to churn out populated printed circuit boards, placing components by the [[Ultra-High-Speed Modular ZTAR YSM40R Overview|hundreds of thousands per hour]] with extreme efficiency.
 
-Within the context of rapid prototyping, this operating profile is untenable. An
-engineer enveloped within a prototyping stage of development desires a machine
-with zero setup that can be used immediately—such a context demands low-setup
-overhead and processes optimised for low volumes, perhaps a handful of boards
-for any singular revision. This deems the [[Setup time reduction for electronics assembly|multi-hour setup and programming time]] required for a typical industrial pick-and-place largely infeasible; an effectual non-consideration for rapid prototyping.
+Within the context of rapid prototyping, this operating profile is untenable. An engineer enveloped within a prototyping stage of development desires a machine with zero setup that can be used immediately—such a context demands low-setup overhead and processes optimised for low volumes, perhaps a handful of boards for any singular revision. This deems the [[Setup time reduction for electronics assembly|multi-hour setup and programming time]] required for a typical industrial pick-and-place largely infeasible; an effectual non-consideration for rapid prototyping.
 
 Similarly, industrial pick-and-place machines are designed around an ecosystem of tape and reels. These are fantastically versatile when assembling at-scale, but engineers scarcely prototype with 5000 component-count reels; instead preferring cut-tape and loose-in-bag packaging options with the small quantities required. These loose components are wholly unsupported by industrial pick-and-place machines in the worst case, or severely inhibit performance and balloon operating costs in the best case.
 
