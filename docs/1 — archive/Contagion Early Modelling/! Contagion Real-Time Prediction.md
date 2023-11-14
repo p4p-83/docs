@@ -6,7 +6,7 @@
 # The Summary
 
 > [!summary] Pitch
-> In a nutshell, this project looks to investigate the possible of real-time, 'on-the-ground' contagious disease modelling. The goal of such a system is to alert individuals that they are latently infected before they become symptomatic and infectious to others.
+> In a nutshell, this project looks to investigate the possiblity of real-time, 'on-the-ground' contagious disease modelling. The goal of such a system is to alert individuals that they are latently infected before they become symptomatic and infectious to others.
 
 > [!question] Guiding Questions
 > - What if a tool could predict that you were infected by a virus in question before you could spread it, let alone return a positive test for it?
