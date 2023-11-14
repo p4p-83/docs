@@ -38,6 +38,6 @@ Whilst the full implementation of such a machine would be the ideal outcome of o
 Therefore, this project is to comprise of the following component parts, each represented by a focussing question:
 1. How can we circumvent visual occlusions caused by the nozzle, such that the user retains a clear view of the board at all times?
 2. How can we intelligently locate ('snap') a component to its respective pads, regardless of the presence of applied solder paste?
-3. Is it feasible to apply solder paste directly with the machine? If so, does this produce *better* system performance than pre-applied paste?
-4. How can we identify the optimal location at which to pick up a component?
+3. How can we identify the optimal location at which to pick up a component?
+4. Is it feasible to apply solder paste directly with the machine? If so, does this produce *better* system performance than pre-applied paste?
 5. Is there a need or benefit to an increase in the degrees of freedom of the head?
