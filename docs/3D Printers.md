@@ -22,3 +22,10 @@ Unfortunately, none of these are maintained open-source—the Creality Ender-3 s
 There do appear to be actively maintained third-party repositories however, such as [`mriscoc/Ender3V2S1`](https://github.com/mriscoc/Ender3V2S1) for the [[Creality Ender-3 S1 Pro]] and [[Creality Ender-3 S1 Plus]] printers.
 
 These repositories all appear to feature the term '[[Marlin]]'—which seems to be an open-source firmware/driver for 'most of the world's 3D printers'—this will require more investigation in due course.
+
+> [!fail]
+> For the time being, the best call is likely to hold off until we better understand our requirements, rather than blowing a significant portion of our budget now.
+> 
+> What we're designing looks much more like a laser cutter than 3D printer, and all the laser cutters that I've seen use belts for a reason.
+> 
+> Lead screws will be painfully slow when you have to return to origin to pick up every single component.
