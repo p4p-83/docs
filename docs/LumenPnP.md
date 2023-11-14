@@ -13,3 +13,4 @@ This one is particularly interesting as the [[Gantry System]] is only available 
 	![[Pasted image 20231114170214.png]]
 
 - [USB Camera Set](https://www.opulo.io/products/openpnp-usb-camera-set) for our [[Cameras]].
+	![[Pasted image 20231114180244.png]]
