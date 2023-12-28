@@ -1,0 +1,23 @@
+.markdown-source-view .HyperMD-header {
+	padding-top: 1em !important;
+	padding-bottom: 0.2em !important;
+
+	font-family: "Sofia Pro";
+	font-weight: 300;
+
+	color: var(--text-accent);
+
+}
+
+.markdown-source-view .HyperMD-header-1 {
+	font-size: 1.4em;
+}
+
+.markdown-source-view .HyperMD-header-2 {
+	font-size: 1em;
+}
+
+.markdown-source-view .HyperMD-header-3 {
+	font-size: 0.8em;
+	font-weight: 600;
+}

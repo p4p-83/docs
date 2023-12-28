@@ -1,0 +1,54 @@
+/*
+ *	Paragraph spacing styles for Obsidian
+ *
+ *	All empty lines to be collapsed (not shown unless you put the cursor on them) and all paragraphs
+ *	are then spaced using a specific padding value. This means that all paragraphs will be evenly
+ *	spaced regardless of whether there are one or two newline characters seperating them.
+ *
+ *	This means that you can write with less thought given to paragraph breaks. It is highly
+ *	recommended that this style is used in conjunction with the Linter plugin so that the newlines
+ *	can be kept consistent by some software (given that you'll no longer be able to see the difference
+ *	while writing). Indeed the goal is to allow paragraph breaking to be fully conformant with the
+ *	Markdown standards (through use of the Linter) while still being customisable and looking good
+ *	within the editor itself. It's just one fewer distraction while writing.
+ */
+
+/* reading mode */
+.markdown-preview-view h1 {
+	margin-block-start: 1em;
+	margin-block-end: 0.5em;
+	font-size: 1.5em;
+}
+
+.markdown-preview-view p {
+	margin-block-start: 0.5em;
+	margin-block-end: 0.5em;
+}
+
+/* source view and live preview */
+
+/** Add paragraph spacing to the end of all lines that are non-empty (as well as the active line).
+ *	Space is added to the current line to make the behaviour less glitch and noticable.
+ */
+.markdown-source-view :is(.cm-line + :is(.cm-active, .cm-line:not(:has(br))):not(:has(span)):not(.HyperMD-codeblock)) {
+	padding-top: 0.4em;
+}
+
+/**	Hide all non-active, empty lines that follow a paragraph.
+ *	Otherwise there would be too much space. This hides the first line, letting the following (second)
+ *	line appear where the first otherwise would have, and allowing third and subsequent newlines appear
+ *	naturally increasingly far down the page. (Deleting all newlines would be unpleasant.)
+ */
+.markdown-source-view :is(.cm-line:not(:has(br)) + .cm-line:not(.cm-active):has(br)):not(.HyperMD-codeblock) {
+	height: 0;
+}
+
+/**	Hide an empty line that follows an active empty line.
+ *	We have to unhide a blank line when the user tries puts their cursor on it, otherwise they'd get
+ *	very confused very quickly. Unfortunately, this can cause the text to become jumpy, particularly
+ *	when there's another blank line already shown afterwards. This selector causes any second blank
+ *	line to be hidden instead so that the net whitespace can remain as constant as possible.
+ */
+.markdown-source-view :is(.cm-active + .cm-line:has(br)):not(.HyperMD-codeblock) {
+	height: 0;
+}
