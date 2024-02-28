@@ -1,0 +1,89 @@
+{
+  "settings": {
+    "migrated": 4,
+    "iconPacksPath": ".obsidian/icons",
+    "fontSize": 16,
+    "emojiStyle": "native",
+    "iconColor": null,
+    "recentlyUsedIcons": [
+      "TiSpeakerphone",
+      "TiFileTypePdf",
+      "TiSourceCode",
+      "TiBookmarks",
+      "TiNotes"
+    ],
+    "recentlyUsedIconsSize": 5,
+    "rules": [
+      {
+        "icon": "TiSpeakerphone",
+        "rule": "3 — latex/pitch\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 0,
+        "useFilePath": true
+      },
+      {
+        "icon": "TiFileTypePdf",
+        "rule": "3 — latex\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 1,
+        "useFilePath": true
+      },
+      {
+        "icon": "TiBookmarks",
+        "rule": "2 — references\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 2,
+        "useFilePath": true
+      },
+      {
+        "icon": "TiBrowser",
+        "rule": "9 — static\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 3,
+        "useFilePath": true
+      },
+      {
+        "icon": "TiVirusOff",
+        "rule": "1 — archive/Contagion Early Modelling\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 4,
+        "useFilePath": true
+      },
+      {
+        "icon": "TiArchive",
+        "rule": "1 — archive\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 5,
+        "useFilePath": true
+      },
+      {
+        "icon": "TiPaperclip",
+        "rule": "0 — attachments\\/[\\w\\d\\s]+\\.(?:\\w+\\.)*\\w+",
+        "for": "files",
+        "order": 6,
+        "useFilePath": true
+      }
+    ],
+    "extraMargin": {
+      "top": 0,
+      "right": 4,
+      "bottom": 0,
+      "left": 0
+    },
+    "iconInTabsEnabled": true,
+    "iconsBackgroundCheckEnabled": false,
+    "iconInTitleEnabled": false,
+    "iconInFrontmatterEnabled": false,
+    "iconsInNotesEnabled": true,
+    "iconIdentifier": ":"
+  },
+  "! Part IV Project.md": "TiSchool",
+  "README.md": "TiNotes",
+  "0 — attachments": "TiPaperclip",
+  "1 — archive": "TiArchive",
+  "1 — archive/Contagion Early Modelling": "TiVirusOff",
+  "9 — static": "TiBrowser",
+  "2 — references": "TiBookmarks",
+  "3 — latex": "TiFileTypePdf",
+  "3 — latex/pitch": "TiSpeakerphone"
+}
