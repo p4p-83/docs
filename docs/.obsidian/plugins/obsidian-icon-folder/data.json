@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "TiNotes",
+      "TiCheckbox",
       "TiSpeakerphone",
       "TiFileTypePdf",
-      "TiSourceCode",
-      "TiBookmarks",
-      "TiNotes"
+      "TiSourceCode"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [
@@ -85,5 +85,7 @@
   "9 — static": "TiBrowser",
   "2 — references": "TiBookmarks",
   "3 — latex": "TiFileTypePdf",
-  "3 — latex/pitch": "TiSpeakerphone"
+  "3 — latex/pitch": "TiSpeakerphone",
+  "! Tasks.md": "TiCheckbox",
+  "! Pages.md": "TiNotes"
 }
