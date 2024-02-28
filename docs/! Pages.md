@@ -2,6 +2,11 @@
 
 # Pages
 
+## Logbooks
+
+[[James' Logbook]]
+[[Sam's Logbook]]
+
 ## Tasks
 
 [[! Tasks]]

@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "TiNotebook",
       "TiNotes",
       "TiCheckbox",
       "TiSpeakerphone",
-      "TiFileTypePdf",
-      "TiSourceCode"
+      "TiFileTypePdf"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [
@@ -71,7 +71,7 @@
       "left": 0
     },
     "iconInTabsEnabled": true,
-    "iconsBackgroundCheckEnabled": false,
+    "iconsBackgroundCheckEnabled": true,
     "iconInTitleEnabled": false,
     "iconInFrontmatterEnabled": false,
     "iconsInNotesEnabled": true,
@@ -87,5 +87,8 @@
   "3 — latex": "TiFileTypePdf",
   "3 — latex/pitch": "TiSpeakerphone",
   "! Tasks.md": "TiCheckbox",
-  "! Pages.md": "TiNotes"
+  "! Pages.md": "TiNotes",
+  "4 — logbooks": "TiNotebook",
+  "4 — logbooks/James' Logbook.md": "TiNotebook",
+  "4 — logbooks/Sam's Logbook.md": "TiNotebook"
 }
