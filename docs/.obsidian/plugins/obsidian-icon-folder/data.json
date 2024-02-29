@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "TiFilePencil",
       "TiNotebook",
       "TiNotes",
       "TiCheckbox",
-      "TiSpeakerphone",
-      "TiFileTypePdf"
+      "TiSpeakerphone"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [
@@ -90,5 +90,6 @@
   "! Pages.md": "TiNotes",
   "4 — logbooks": "TiNotebook",
   "4 — logbooks/James' Logbook.md": "TiNotebook",
-  "4 — logbooks/Sam's Logbook.md": "TiNotebook"
+  "4 — logbooks/Sam's Logbook.md": "TiNotebook",
+  "5 — minutes": "TiFilePencil"
 }
