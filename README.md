@@ -31,4 +31,4 @@ In completing this research, we hope to;
 ## Project Documentation
 
 > [!important]
-> Visit the [GitHub Pages deployment](https://docs.jamesnzl.xyz/p4p) to view this project's documentation.
+> Visit the [GitHub Pages deployment](https://p4p.jamesnzl.xyz) to view this project's documentation.
