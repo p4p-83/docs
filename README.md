@@ -16,7 +16,7 @@ The end goal is to demonstrate a machine vision algorithm that is sympathetic to
 
 ### Research Outcomes
 
-We intend to research the improvements to accessibility, productivity, and health that could come as a result of light computer assistance. Presently, many machines exist that are either entirely human­controlled or entirely computer numerical-controlled, and relatively few designs deliberately blend the two approaches. 
+We intend to research the improvements to accessibility, productivity, and health that could come as a result of light computer assistance. Presently, many machines exist that are either entirely human­-controlled or entirely computer numerical-controlled, and relatively few designs deliberately blend the two approaches. 
 
 The unique challenges associated with machine tool control in this manner will require us to iterate upon and blend research from neighbouring fields. This will lead to a better understanding of machine vision algorithms in the context of shared control methods. 
 
