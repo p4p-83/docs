@@ -203,3 +203,123 @@
 
 - Setting up the GitHub project by adding a Board & Timeline view for the Gantt chart
 - Copying across the major deliverables into the project
+
+## 6 Mar
+
+- Collecting the Raspberry Pi 5s, ArduCam, and HQ Camera from Akshat
+
+## 13 Mar
+
+- Getting started with the Pi + camera
+- Flashing the Raspberry Pi OS on the microSD card
+- Updating system packages
+- Using `rpicam-hello` and `rpicam-jpeg` to test the camera is working
+
+- Installing XQuartz to allow X forwarding of the preview window over SSH
+```sh
+# Verify XQuartz has configured $DISPLAY correctly
+echo $DISPLAY
+
+# ssh with X forwarding
+ssh -X james@rpi.local
+
+# start the camera with X forwarding
+rpicam-vid -t 0 --qt-preview
+```
+
+- It works!!
+- It's just far from fast, there's easily a 6+ second delay before the preview window updates
+- Will try [network streaming](https://www.raspberrypi.com/documentation/computers/camera_software.html#network-streaming) now
+
+- Can get a connection with TCP, but it's:
+	- Not any lower latency, and
+	- Still finnicky—the stream doesn't seem to start until I ping `rpi.local` in a separate terminal window??
+
+- Installing `ffmpeg` to try using `ffplay` for the 'low-latency' solution as documented in the [docs](https://www.raspberrypi.com/documentation/computers/camera_software.html#tcp)
+- Hey! This is pretty good!
+```sh
+# On server (Pi)
+rpicam-vid -t 0 --inline --listen -o tcp://0.0.0.0:2121 --nopreview
+
+# On client
+ffplay tcp://rpi.local:2121 -vf "setpts=N/30" -fflags nobuffer -flags low_delay -framedrop
+```
+
+## 14 Mar
+
+### Mounting Raspberry Pi SD Card
+
+#### macOS
+
+- Note: requires `macfuse` and `ext4fuse`.
+- If homebrew complains with `brew install ext4fuse`, try `brew install gromgit/fuse/ext4fuse-mac`.
+
+```sh
+diskutil list
+
+sudo mkdir /Volumes/rpi
+
+sudo ext4fuse /dev/disk<...> /Volumes/rpi -o allow_other
+
+# unmount
+sudo diskutil unmount /Volumes/rpi
+```
+
+> [!fail]
+> Oh... `ext4fuse` on macOS is an _only_ read implementation...
+
+#### Ubuntu
+
+- Okay, I will try installing Ubuntu as a guest OS through Parallels
+- After lots of frustration... it works if you:
+	1. Eject `bootfs` from Finder in macOS
+	2. Explicitly pass `bootfs` into Parallels as a USB device
+	3. `rootfs` appears!
+- [hilarity](https://share.cleanshot.com/VXpVKmMK)
+
+### Changing WiFi SSID Without Remote Access
+
+- Open `etc/wpa_supplicant/wpa_supplicant.conf`
+- Add
+	```
+	network={
+		ssid="Wifi1"
+		psk="passphrase1"
+		priority=100
+	}
+
+	network={
+		ssid="UoA-WiFi"
+		key_mgmt=WPA_EAP
+		identity="jbao577"
+		password=""
+	}
+	```
+
+## 15 Mar
+
+- Hm... the `wpa_supplicant.conf` changes yesterday don't seem to work
+- Neither on `UoA-WiFi`, neither on my personal hotspot
+- I will follow the steps in [this guide](https://learn.sparkfun.com/tutorials/headless-raspberry-pi-setup/wifi-with-dhcp)
+
+- Still didn't work.
+- Caved and bought a micro HDMI cable from PB Tech
+- Connected to the network through the OS, and managed to SSH into it using the IP address
+- Nice!
+
+- Reading through Sam's _The First Quarter_ proposal
+
+- I should probably start looking at literature...
+
+## 16 Mar
+
+- Starting to work on the Project Risk Assessment
+
+- Discussion with Sam re: using a game engine for the user interface
+
+## Sun 17 Mar
+
+- Continuing to work on the Project Risk Assessment
+- Completed most of the hazard identification & risk control, but will want to check the risks posted on the door to the lab for anything I've missed
+
+- Starting to work towards the literature review
