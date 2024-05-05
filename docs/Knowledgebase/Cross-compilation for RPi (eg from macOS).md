@@ -159,3 +159,13 @@ I have found that you can copy the whole /Volumes/ct-ng/x-tools/aarch64-unknown-
 I am considering putting the compiler in a sensible location on my hard drive and adding it to PATH. I will report back if I do.
 
 I am currently in the process of recompiling my toolchain. As above, it failed at the 65th minute, and while I did get enough of a toolchain to compile a simple test program, I would like to get a clean build so that I can know that my compiler is good going forward. Hopefully it was just a trivial or one-off glitch that caused it to fail — time will tell.
+
+## Using LLVM
+
+Clang can work as a cross compiler provided you have the target's headers and std libraries installed. <https://clang.llvm.org/docs/CrossCompilation.html>.
+
+You can achieve this by setting it all up in a Docker container <https://solarianprogrammer.com/2019/05/04/clang-cross-compiler-for-raspberry-pi/>.
+
+And for testing purposes, it might help to run commands live using `docker run -it --entrypoint /bin/bash` — see <https://stackoverflow.com/questions/30172605/how-do-i-get-into-a-docker-containers-shell#30173220>.
+
+But at this point I might as well just use Raspberry Pi's supplied cross-compilers from apt-get: <https://github.com/raspberrypi/tools>.
