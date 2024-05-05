@@ -4,6 +4,8 @@ I do not know how well this method will play with VS Code intellisense. I hear y
 
 ## Building your own cross compiler
 
+*NOTE:* do not use ltrace as I did. It'll crash every time.
+
 Derived from <https://uav-lab.org/2017/02/15/how-to-set-up-an-arm-cross-compiler-toolchain-for-macos/> to get started and <https://www.bootc.net/archives/2012/05/26/how-to-build-a-cross-compiler-for-your-raspberry-pi/> for something old but rpi-specific.
 
 I've gone through the steps myself. It takes a damn long time but I went about it as follows.
