@@ -6,6 +6,8 @@ I do not know how well this method will play with VS Code intellisense. I hear y
 
 *NOTE:* do not use ltrace as I did. It'll crash every time.
 
+*EDIT*: I have yet to update this page with the steps that eventually worked. All I had to change to get a fully successful build was to disable ltrace and strace in one of the config pages. I can't remember which anymore, hence the lack of update. If anyone follows along in future, note that you should disable these.
+
 Derived from <https://uav-lab.org/2017/02/15/how-to-set-up-an-arm-cross-compiler-toolchain-for-macos/> to get started and <https://www.bootc.net/archives/2012/05/26/how-to-build-a-cross-compiler-for-your-raspberry-pi/> for something old but rpi-specific.
 
 I've gone through the steps myself. It takes a damn long time but I went about it as follows.
