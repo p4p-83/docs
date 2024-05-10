@@ -21,9 +21,11 @@ You can now include libcamera in C++ using `#include <libcamera/libcamera.h>`. T
 ```bash
 
 # compile main.cpp to a.out (or whatever the default name is)
-g++ -I/usr/local/include/libcamera/ main.cpp /usr/local/lib/aarch64-linux-gnu/libcamera.so
+g++ -I/usr/local/include/libcamera -L/usr/local/lib/aarch64-linux-gnu main.cpp -lcamera -lcamera-base
 
 ```
+
+Note that you can use `pkg-config --libs --cflags libcamera` to find those inclusion args.
 
 # Cross-compiling
 
