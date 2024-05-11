@@ -2,7 +2,7 @@
 
 # James' Logbook
 
-## 28 Feb
+## Wed 28 Feb
 
 - 700A lecture with Morteza to discuss project expectations/brief
 - Informal meeting with Sam afterwards to discuss immediate next steps, things to prepare before tomorrow's meeting with Nitish
@@ -15,7 +15,7 @@
 - Updating repository settings
 - Creating new GitHub organisation
 
-## 29 Feb
+## Thu 29 Feb
 
 ### Supervisor Meeting
 
@@ -204,11 +204,11 @@
 - Setting up the GitHub project by adding a Board & Timeline view for the Gantt chart
 - Copying across the major deliverables into the project
 
-## 6 Mar
+## Wed 6 Mar
 
 - Collecting the Raspberry Pi 5s, ArduCam, and HQ Camera from Akshat
 
-## 13 Mar
+## Wed 13 Mar
 
 - Getting started with the Pi + camera
 - Flashing the Raspberry Pi OS on the microSD card
@@ -245,7 +245,7 @@ rpicam-vid -t 0 --inline --listen -o tcp://0.0.0.0:2121 --nopreview
 ffplay tcp://rpi.local:2121 -vf "setpts=N/30" -fflags nobuffer -flags low_delay -framedrop
 ```
 
-## 14 Mar
+## Thu 14 Mar
 
 ### Mounting Raspberry Pi SD Card
 
@@ -296,7 +296,7 @@ sudo diskutil unmount /Volumes/rpi
 	}
 	```
 
-## 15 Mar
+## Fri 15 Mar
 
 - Hm... the `wpa_supplicant.conf` changes yesterday don't seem to work
 - Neither on `UoA-WiFi`, neither on my personal hotspot
@@ -311,7 +311,7 @@ sudo diskutil unmount /Volumes/rpi
 
 - I should probably start looking at literature...
 
-## 16 Mar
+## Sat 16 Mar
 
 - Starting to work on the Project Risk Assessment
 
@@ -323,3 +323,500 @@ sudo diskutil unmount /Volumes/rpi
 - Completed most of the hazard identification & risk control, but will want to check the risks posted on the door to the lab for anything I've missed
 
 - Starting to work towards the literature review
+- I will start looking into:
+	- Image processing algorithm/keying
+		- Astronomical image processing? Counting stars based on pixel values may be relevant/interesting.
+	- Integration of machine assistance with human input—shared control
+	- General fly-by-wire control
+
+### Literature Review
+
+**Relevant Knowledge Areas/Keywords**
+
+- Image processing algorithms
+- Image keying
+- Machine vision
+- Computer vision
+- Gradient ascent computer vision
+
+- Shared control
+- Human-in-the-loop
+- Cooperative control
+- Human computer interaction
+
+- Input multiplexing
+- Input mixing
+- Cooperative machine vision algorithm
+- Human-centric machine vision
+
+- Fly-by-wire control
+- Human-centric automation
+
+- Smart pick-and-place machine
+- Pick-and-place for rapid prototyping
+- Pick-and-place with machine vision snapping
+
+- Image decluttering (for lit review only)
+	- A reference clean PCB from the PDF, overlaid onto a location, and matching the camera data onto that PDF image
+
+## Mon 18 Mar
+
+### Supervisor Meeting
+
+- Applying some classic AI techniques for decluttering
+	- Reference PCB image (clean, from PDF)
+	- Overlay on location
+	- What it sees, it tries to match with the PDF
+	- Just for the literature review
+
+- 6DOF coordinate control
+
+- ufactory.cc uArm Swift Pro
+
+
+18 Mar 1143–1352
+
+#### Attendees
+
+- Dr Nitish Patel (N)
+- James Bao (J)
+- Sam Skinner (S)
+
+#### Absentees
+
+- Nil
+
+#### Agenda
+
+- Progress check in
+- Literature review topics
+- Risk assessment form
+- Dismissal of joystick
+
+#### Key Takeaways/Future Actions
+
+- Joystick dropped... (cool idea for a future project!)
+
+- James to come in and start working on gantry & robotic arm
+- James to begin creating test PCB to allow for benchmarking performance
+
+- Sam to write down the various scenarios, pros and cons of each, and we explore one of them before the submission date
+- Sam to begin producing prototype of mechanical head assembly
+- Nitish recommends to use off-the-shelf components where possible
+
+- To look into getting a lens protector for the camera
+- Need to get the 27W Raspberry Pi 5 power supplies
+- Sam to provide a full list of other mechanical/pneumatic parts to buy
+
+- Risk assessment essentially completed, James and Sam just to finish the risk assessment matrix and submit to Canvas
+
+#### Minutes
+
+- James has completed an exploratory investigation into the Raspberry Pi & high quality camera
+- Can stream output to laptop, mount Linux `rootfs` SD card on laptop, etc.
+- SSH into the Pi, including on the University network
+- Look into getting a lens protector
+
+- James and Sam need the Raspberry Pi 27W (5V, 5A) USB PD power supplies ([$22 from PB Tech](https://www.pbtech.co.nz/product/SEVRBP0511/Raspberry-Pi-Official-27W-Power-Supply-White-AU-Pl))
+
+- Dropped joystick ideas in favour of keyboard due to time management/other implementation considerations like zero point, project scope
+- Gone more down a video game direction for user input/interface/visual feedback
+- eg field of view feedback
+
+- Sam recently working on the pickup head, with a small mockup
+
+- In terms of literature, James intending to focus into:
+	- Image processing algorithms; keying
+	- Integration of machine vision with human input; shared control
+	- General fly-by-wire controls
+- Nitish suggested looking into AI techniques for decluttering
+- Purely for the literature review
+- A reference clean PCB image from the PDF
+- Overlaid onto a location, and matching the camera data onto the PDF image
+
+- Also algorithms required for the 6DOF control
+- The robot itself is actually 4DOF, but look into the relevant algorithms/coordinate transforms
+
+- Sam has been thinking about lots of ideas for the vacuum head
+- Hoeken linkage
+- Need to start laser cutting a prototype and looking at feasibility
+- Operate in a horizontal plane rather than vertically
+
+- Sam discussing force sensing considerations/design
+- To provide Nitish with a list of parts to buy—vacuum pump, and other needs
+
+- Laser targeting of the nozzle/head
+
+- Sam to write down the various scenarios, pros and cons of each, and we explore one of them before the submission date
+
+- Discussion about benchmarking the performance of the two mechanisms
+- Frosted glass to act as an optical filter, with a bottom-mounted camera that is looking up to see where the head is (when it is lowered to touch the glass)
+- Some electrical solution with a test PCB that implements continuity tests
+- Varying pad sizes, etc., to benchmark repeatability & precision
+- We want some automated benchmark method
+
+- Sam asking about the University's preferred suppliers for mechanical parts
+- Not a hard and fast rule
+
+- James to look into ROS (Robot Operating System)
+- Gold standard in robotics/research for a while now
+
+- Risk assessment essentially completed, James and Sam just to finish the risk assessment matrix and submit to Canvas
+
+- Discussion about final project requirements re: connected computer
+- Eventually have the two Raspberry Pis running everything standalone, for now use our computers for development
+
+- Discussion about network switch/router to access Pi/VNC
+- James has managed to get SSH access to the Pi over WiFi though
+
+- More of Sam's head discussion
+- Geneva mechanism, crank slider
+- Two brass tubes
+- Nitish recommends to use off-the-shelf components where possible
+- Profile the wear of the tubes
+- Buy a few of the pumps
+
+## Tue 19 Mar
+
+- Starting to play with the robotic arm
+- Have connected it to my phone with uArm Play
+- Motion is more jittery than I thought... the repeatability looks alright though
+
+- uArmStudio is not supported on ARM silicon, installing it on Windows instead
+
+- The gantry is a Makeblock XY plotter 2.0
+- Have to install CH340 drivers
+- Installing from the [manufacturer's website](https://www.wch.cn/downloads/CH341SER_MAC_ZIP.html)
+- Nice! Detected now!
+- But it dies as soon as I connect to the port...
+- Oh, GRemote is just a Java applet... there is also a `.sh` to launch it on macOS
+- This doesn't work either? It sees the ports, but none of the open the remote interface
+- Hmm... I want to at least get this remote working before I try to do anything else
+
+- I will need to verify that the drivers were correctly installed on macOS
+
+## Sat 23 Mar
+
+- Converting logomark type to outlines
+- Creating variant with transparent background
+
+## Sun 24 Mar
+
+- Using transparent background logomark to create Altium templates
+- Creating a shortlist of potential project logotypes
+
+- [Encode Sans SC](https://fonts.google.com/specimen/Encode+Sans+SC?preview.text=0O1Il%20a%20pick%20and%20place%20rapid%20prototyping%20%7C%20Raspberry%20Pi%20%7C%20Part%20IV%20Project%20%2383&preview.text_type=custom&stroke=Sans+Serif)
+- [Varta](https://fonts.google.com/specimen/Varta?preview.text=0O1Il%20a%20pick%20and%20place%20rapid%20prototyping%20%7C%20Raspberry%20Pi%20%7C%20Part%20IV%20Project%20%2383&preview.text_type=custom&stroke=Sans+Serif)
+- [Encode Sans Semi Expanded](https://fonts.google.com/specimen/Encode+Sans+Semi+Expanded?preview.text=0O1Il%20a%20pick%20and%20place%20rapid%20prototyping%20%7C%20Raspberry%20Pi%20%7C%20Part%20IV%20Project%20%2383&preview.text_type=custom&stroke=Sans+Serif)
+- [Rambla](https://fonts.google.com/specimen/Rambla?preview.text=0O1Il%20a%20pick%20and%20place%20rapid%20prototyping%20%7C%20Raspberry%20Pi%20%7C%20Part%20IV%20Project%20%2383&preview.text_type=custom&stroke=Sans+Serif)
+- [Alegreya Sans SC](https://fonts.google.com/specimen/Alegreya+Sans+SC?preview.text=0O1Il%20a%20pick%20and%20place%20rapid%20prototyping%20%7C%20Raspberry%20Pi%20%7C%20Part%20IV%20Project%20%2383&preview.text_type=custom&stroke=Sans+Serif)
+- [Ubuntu](https://fonts.google.com/specimen/Ubuntu?preview.text=0O1Il%20a%20pick%20and%20place%20rapid%20prototyping%20%7C%20Raspberry%20Pi%20%7C%20Part%20IV%20Project%20%2383&preview.text_type=custom&stroke=Sans+Serif)
+
+## Tue 26 Mar
+
+- Raiding Makerspace for some M4 screws & nuts
+- Fitted the gantry feet finally
+- Need to get some shorter screws though
+
+- Compressed Air induction
+
+- Quick catch-up/demo of the robotic arm with Nitish
+
+## Sun 31 Mar
+
+- Finally starting literature review
+
+### Literature Review
+
+- Sam has found an interesting paper: [[A policy-blending formalism for shared control]]
+- Other interesting papers he has found:
+	- [[Haptic shared control - smoothly shifting control authority?]]
+	- [[Cooperative Human and Machine Perception in Teleoperated Assembly]]
+
+## Mon 1 Apr
+
+- Setting up Mendeley & browser extension
+- Huh, it's quite nice!!! Auto-citations!!
+- Way nicer than spending 5 minutes per paper...
+- The PDF viewer isn't ProMotion though :(
+
+- Also looking into the references cited by papers I have found and collecting them too
+
+### Searched Keywords
+
+- image processing algorithm
+- image processing algorithm locating location
+- image processing fiducial
+- image processing pcb footprint
+- image processing fiducial auto-alignment
+- computer vision footprint
+- computer vision electronics footprint
+- computer vision circuit board footprint
+- computer vision circuit board
+- computer vision circuit board pad
+
+## Thu 4 Apr
+
+- Continuing to collect literature
+
+### Searched Keywords
+
+- circuit board machine vision
+
+## Sat 6 Apr
+
+- I've been so ineffective this week...
+- I will try to finally finish collecting literature today...
+
+### Searched Keywords
+
+- Image keying
+
+## Wed 10 Apr
+
+- Wow, I really am so bad at this...
+
+### Searched Keywords
+
+- Gradient ascent computer vision
+
+## Tue 23 Apr
+
+- It's been two weeks...
+- Screw 723 and 770 -.-
+
+### Call with Nitish
+
+- One section in the Literature Review for each topic of research
+
+- For each paper, look at the Abstract, see what they have discovered, see their techniques, read their conclusions
+- Should give a very good idea about whether that methodology is appropriate for our use
+- If determine that its relevant, can also look at the papers that they have referred to
+
+- Statement of research intent/'project proposal' is to construct a pathway as a consequence of the literature review
+- not a full project proposal
+- some stated research questions
+- some intended methodologies
+- some distilled summary of the lit review
+
+- don't bother with going into great depth (when I asked about whether to focus on a little number of papers in depth, or more papers for breadth)
+- take the papers on face value
+- remember that its unverified
+- distill as much information as I can from them in the literature review
+- keep in mind that these need to be validated and replicated
+
+- breadth is better than depth
+
+- goals, objectives to come first
+- set of specifications
+- literature review
+- research question & methodology (the few challenges that you can identify)
+
+### Searched Keywords
+
+- Stochastic gradient descent algorithm computer vision
+
+- Shared control
+
+### Reference Manager
+
+- Mendeley is pissing me off wayyyy too much
+- Looking into alternatives
+- Bookends (macOS exclusive!!), Papers, Zotero, Petal
+
+#### Bookends
+
+- Nice!!!
+- Workflow is quite unfamiliar though, there is no browser extension
+- Testing the Bookends Browser for a bit, but I'm not the biggest fan
+- This also doesn't import the abstract and things
+- PDF notes are ProMotion, but the tools aren't the best
+
+- Oh, I can import RIS from the clipboard! This should work!
+- I can also just install a nicer system PDF editor...
+
+### Petal
+
+- Huh, cool AI stuff
+- Smooth PDF editing, and nice annotation features (arbitrary square annotations, highlighting)
+- Opens in a new tab though...
+- Browser-based, a bit slow, lots of AI...
+
+### Zotero
+
+- Nice browser connector, but still not the fastest
+- Imports the abstract at least
+- At least for IEEE PDFs, it tries to search for it from another source rather than taking it directly from Xplore
+- Annotation is 60 Hz and not the best featured anyway...
+
+## Wed 24 Apr
+
+- Still just collecting more literature...
+
+- Loving Bookends though!
+- Have also installed Highlights as a PDF editor, it seems quite nice!
+- Also tried Skim, but didn't like it as much
+
+- Finally happy with the amount of literature that I have collected!
+- Time to grind 💀
+
+### Call with Nitish
+
+- Demonstrate the problem—for example, take a picture of resistors and ICs to identify the problem / show what the outcome must do
+	1. identify the component
+	2. read the markings
+	3. etc.
+ - How are you going to address the issues with repeatability?
+	 - how are we going to achieve precision? repeatability? how are we going to set the specification for precision? (parameterise with minimum pad size)
+ - Why did prior work pick their specific configurations? ie gantry vs arm, gantry components
+	 - eg. the Neoden—why two runners vs one runner?
+		 - rigidity etc
+ - Which type of Actuation? Hydraulic vs pneumatic vs electrical
+ - What is your placement of cameras?
+ - How do you plan to solve the head snapping to a component—not all components are going to be aligned, so how does it identify the correct orientation?
+
+- Can refer to Sam's document, use his figures, diagrams, etc., must my own submission must be complete
+
+- Reasons for choosing the gantry over the arm
+	- xy is fully functional, can go to any (x,y,z)
+	- but there _are_ lots of manufacturers of 6dof arms—the implementation part is done
+		- but rigidity problem? potentially exacerbated once we mount a camera, additional hardware to the head
+
+- Look, at this stage it looks like we are leaning towards x because of ease of software tools, already has a graphical software that operates the plotter, ...
+
+### Searched Keywords
+
+- shared control pick and place
+- human in the loop pick and place
+- human in the loop control
+- human-centric automation
+- rapid prototyping
+
+#### Fruitless Keywords
+
+- human in the loop
+- cooperative control
+- cooperative control pick and place
+- input multiplexing
+- cooperative machine vision algorithm
+
+## Thu 25 Apr
+
+- Yesterday, I finished importing the last of my papers (in this round of searching) into Bookends, then called it a night
+
+- Anzac Day
+- Another (very quick) call with Nitish
+- Oh. he was an NCC cadet??
+- He reiterates to not get overwhelmed...
+
+- Well, I've just spent the entire rest of the day doing 'Anzac Day aftermath'...
+- Fark, definitely overwhelmed.
+- Do I shower and sleep for a few hours again, or just push through?
+
+- Okay, well, there is no point doing _anything_ until I start to read the actual literature... so I'll start doing that first I guess.
+- One on side, it's nice that I collected as much literature as I have—I don't feel like I'm missing crucial information.
+- On the other hand, 43 is _intimidating_.
+- I also already have a *start*, from my project pitch last year—and also the comments that Sam made on it! I'd say that those are probably fair game.
+- Also my meeting minutes and things... I do have information in places!
+
+- I just need to remember what I said to Nitish—a lot of these papers _aren't_ going to be directly relevant, so I should be able to skim over non-relevant sections reasonably quickly.
+
+- Man, I can't even keep my eyes open lol
+	- This would be the equivalent of 2.30am, assuming I woke up at 9am... (it's 8.30pm)
+	- Maybe I sleep until midnight or something... that gives me 17 hours?
+	- Realistically, I don't think I'll be productive if I keep on in this state.
+	- When I wake up, I just need to _remember_ that I need to be judicious, efficient, and deliberate about what I do.
+
+- I've just completely forgotten to research the video game display stuff for  user input/interface/visual feedback...
+	- That's fine. I just won't include it. I need to be judicious right now. Just get something in.
+
+- I really have approached this literature review wrong... rather than going ahead and collecting 43 papers on random things, I should stopped at the first useful one, read it, then just gone from there... This continuous role adaption paper looks like it would have been such a good place to start... but now I have no time...
+- Like, I'm actually starting to be convinced that this project is just impossible... it looks like a whole team of researchers is working on just looking at how to gradually improve the way that a human and a robot can work with each other... while we are doing that, and 1000 other things...
+
+- Hm... I guess a counter-point is that real research doesn't drill down into everything—nothing would _ever_ get done—instead, they just give their experimental set up and leave it at that.
+- The main issue follows that I still do not concretely understand what my research focus will be, as I seem to be under the pretense that _everything_ will be research. I think the only realistic way to go about this project is to accept that half of it is to build the *experimental set-up* for the *thing we actually want to research*, something that I think Sam came to understand many moons ago.
+- This means that all of the exploratory work Nitish was having us do wasn't to skip the step of consulting literature—rather, purely so we could acquire a better grasp on what we had available to us.
+
+### Literature Review Goals
+
+> [!quote] Canvas Announcement
+> Students should present the problem that they are trying to solve, the important research questions, the objectives, and explain why this research is important. The purpose of the literature review is twofold:
+> 
+> - to demonstrate an awareness of the research relevant to your project, and
+> - to summarise the important information or findings that will form the foundations of the work to be undertaken.
+> 
+> The literature review will also reveal if the research to be carried out in the project is something that has not been done before and is worth pursuing in order to advance knowledge in the particular area. The review should show the breadth of the research area and some depth in particular areas.
+
+## Fri 26 Apr
+
+- A mad dash to submit my LRSRI.
+
+## Mon 29 Apr
+
+- Talking with Sam after our Power E test... he has a new idea (vim-like navigation; enter `w` to move to the next pad above, `d` to move to the next pad to the right, etc.
+- Hm.... this is actually a good point... why are we making the user need to 'drag' (in his words), or joystick-like-navigate to the pad of interest at all?
+- I suppose it initially made sense when we were dealing with a joystick, and particularly when we were dealing with a _haptic_ joystick.
+- Now that we've ditched the keyboard, however, does this really make sense?
+- The analogy of vim-like `f`, `x` navigation is _much_ closer to what we are trying to achieve, than a Minecraft-boat-like video game analogy—we necessarily have a finite set of discrete points to which the user may be trying to place the component down on to—whereas Minecraft boat navigation is (pseudo-)continuous. Yes, there may be flowing water attempting to pull the user into a steady-state position, but, in our case _we aren't interested in all of the intermediate positions_—the user would be wanting to simply teleport directly to the pad of interest.
+- This does eliminate the aspect of 'shared control' that previously existed, though, I don't think that this is an issue. It means that our project is going to pivot yet again, however, I think the shared control-approach (particularly with a keyboard) was always going to be a bit of a graft.
+
+## Sat 4 May
+
+- Having more success than before, at least the Windows `.bat` launches the full remote
+- I can click the buttons, and see the GCode being transmitted... and supposedly it responds with an `ok`
+- Nothing moves though?
+- (Shame I forgot to get screenshots)
+
+- Now it is refusing to connect to my computer...
+- I see there is a code comment in `GCodeParser.ino` that 
+```c
+// Port 6 Uno/Orion
+// Note instructions say port 8
+// but the X Limits dont work with pins A0 and A7, they only work in port 
+```
+- I will correspondingly move the limit switch to Port 6
+
+- I will try to re-flash the firmware...
+- Trying to do it from macOS, I don't know which port to be using?
+
+- We have an Orion board, so it's not the same process as an Arduino Leonardo
+
+- Hm... it seems that I _don't_ want the CH340 third-party drivers?
+- https://discussions.apple.com/thread/254867571?sortBy=best
+- https://community.platformio.org/t/macos-ventura-and-ch340/30616/19
+- https://github.com/adrianmihalko/ch340g-ch34g-ch34x-mac-os-x-driver
+- It sounds like Apple now provides first-party drivers... which would check out, as the device was showing up as both `/dev/cu.usbserial-10` and `/dev/cu.wchusbserial10`
+- Uninstalling the drivers, turning off the Orion board, and plugging it into my Mac, I no longer get the duplicate!
+- (This process was finnicky... it seems to work only if I either turn off the board then plug it in, or, turn on the board, hit the reset, then plug it in)
+
+- Fuck yes! With usbserial-10 only, I can program it!
+
+- Got it working with Arduino IDE, programming it as an Uno board
+- Doesn't seem to play ball with Windows, but rather than trying to get that to work, I'll just set it up as a PlatformIO project
+
+- Now lots of refactoring...
+
+## Sun 5 May
+
+- Continuing to refactor
+- Testing polarity of limit switches
+
+## Mon 6 May
+
+- Continuing to refactor... almost there
+
+- Fixing alignment of the gantry with Sam
+- Loose driver connector was such a red herring...
+
+- Discussing `gantry` place in the project
+ - This firmware should basically just take a steps count (not distance units), and go there
+- 'MoveToZero' should just be 'move 1000000000'
+
+- First I will finish refactoring and write a basic testbench
+
+## Thu 11 May
+
+- Meeting with Sam to discuss next steps, project plan, etc.
+- ![[Pasted image 20240511221503.png]]
+
+
