@@ -1,3 +1,6 @@
+# Ignore Literature Review
+lrsri/
+
 ## Ignore Mac and windows files
 .DS_Store
 desktop.ini
