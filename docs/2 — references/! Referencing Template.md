@@ -96,24 +96,24 @@
 | Article date  |         |
 | Journal name  |         |
 | ISSN number   |         |
-| Volume number |         |
+| Volume number |         | 
 | Issue number  |         |
 | Page numbers  |         |
 
 ## e-Journal Article
 
-| Field          | Details     |
-| -------------- | ----------- |
-| Author         |             |
-| Article title  |             |
-| Article date   |             |
-| Journal name   |             |
-| ISSN number    |             |
-| Type of medium | *eg Online* |
-| Volume number  |             |
-| Issue number   |             |
-| Page numbers   |             |
-| URL            |             |
+| Field              | Details     |
+| ------------------ | ----------- |
+| Author             |             |
+| Article title      |             |
+| Article date       |             |
+| Journal name       |             |
+| ISSN or DOI number |             |
+| Type of medium     | *eg Online* |
+| Volume number      |             |
+| Issue number       |             |
+| Page numbers       |             |
+| URL                |             |
 
 ## Book
 
