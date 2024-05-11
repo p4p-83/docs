@@ -27,7 +27,6 @@ The pages listed below contain links, resources, and considerations surrounding 
 
 [[! Referencing Template]]
 
-
 ## Development
 
 ### User Interface
