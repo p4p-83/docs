@@ -40,3 +40,5 @@ You can probably use lldb's `print` command (among others) to get many other thi
 As a final example, here's what a few minutes' find and replace work can do. If this becomes a frequent chore, it wouldn't be too difficult to have Julia run the regexes for you and even evaluate the final string to get the array. At any rate, this is pictured after loading the file into the REPL. It's easy enough to fiddle around with the values and do any desired post-processing.
 
 ![](Screenshot%202024-06-01%20at%2023.37.48.png)
+
+These outputs are recorded in [0601 Sample OpenCV C++ square detection code and its output](0601%20Sample%20OpenCV%20C++%20square%20detection%20code%20and%20its%20output.md).
