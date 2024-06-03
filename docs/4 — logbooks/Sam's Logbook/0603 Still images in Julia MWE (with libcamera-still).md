@@ -223,3 +223,4 @@ Still capture image received
 I think I can somewhat park this particular part of the process (improving capture speed) until after the camera is on the gantry. This step works quite well, and I've already seen examples of much higher Julia throughput working fine. No, there are two higher priorities that this simple and slow method opens the door to:
 
 1. Profiling the gantry performance. We can now use a Julia script to take images and do with them whatever we please. This is useful, because that same Julia script can control the gantry movements using James's code. (We can therefore do some optical repeatability testing if we wish.)
+2. Get some test shots for OpenCV development. This might also need to wait until the camera is on the gantry to get the most representative test shots possible, and so this can perhaps be done in conjunction with (1).
