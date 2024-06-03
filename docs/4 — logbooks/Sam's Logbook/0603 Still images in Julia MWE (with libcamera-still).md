@@ -178,7 +178,7 @@ Observe that I've set it up to time the execution of the three main operations. 
 
 Clearly the Julia matrix operations are not the bottleneck. I suspect these aren't really doing much at all — they'll just be changing how Julia reads out the data or how it is otherwise represented, and not modifying the data itself. The first operation is the slow one, but I do believe that this execution time includes the execution time of libcamera-still itself. That program makes a cold start each time (including, ostensibly, an auto-focus manoeuvre) and is hardly fast at all.
 
-I initially tried this using the generic `RGB` type (the one based on floats, not `RGB{N0f8}`, this latter being based on the fixed-point 0 integer, 8 fractional native to the return type of libcamera-still). This increased performance significantly: performing a floating-point division on all of those pixels when preparing the `mat` was taking 0.080457 seconds. Clearly the above code is more optimum now, but I'm not sure how this will reflect on the performance of subsequent code. (If this subsequent code needs to convert to a floating-point representation, then the above saving came at the expense of a following step's performance.)
+I initially tried this using the generic `RGB` type (the one based on floats, not `RGB{N0f8}`, this latter being based on the fixed-point 0 integer, 8 fractional native to the return type of libcamera-still). This increased performance significantly: performing a floating-point division on all of those pixels when preparing `mat` was taking 0.080457 seconds. Clearly the above code is more performant now, but I'm not sure how independent this is of subsequent code. (If this subsequent code needs to convert to a floating-point representation, then the above saving came at the expense of a following step's performance.)
 
 I've been doing all of this in VS Code, and the Julia extension automatically displays the image output from the `colorview` step. I've been using this for debugging, and I can drag the image out and put it here. Here's the PCB with a red light shone on it as captured by the above code.
 
@@ -191,3 +191,35 @@ Clearly the autofocus is not doing the advertised job… but that's on libcamera
 Also, yes, the image is rotated a lot. I can fix this with `mat = permutedims(reshape(raw, channels, w, h), (1, 3, 2))` (which is then upside down, but there's a `libcamera-still` arg for that I suppose) but I won't: this takes the `@time` stat to 0.133606 seconds (5 allocations: 34.172 MiB). Not ideal: I'd rather physically rotate the camera! (In the event that isn't possible, I could just do all the processing on the rotated image, and then just rotate the results about 90 degrees. I'd prefer this, as the results will probably just be a small and manageable collection of points or vectors.)
 
 — A bit of an afterthought, but I have only just realised that the image is flipped (the 'Algovision' text reads backwards). This is mildly embarassing, but falls in the same category of the rotation error. This is also fixable with a `libcamera-still` argument, but could equally just be ignored and addressed with a final transform on the computed CV results.
+
+— Another addition: a sample command line output. Here's what I get when I run the relevant lines of script in the REPL.
+
+```
+julia> w = 4608
+       h = 2592
+       channels = 3 # RGB
+       @time raw = read(`libcamera-still --width $w --height $h --lens-position 1.0 --awb tungsten --immediate --encoding=rgb --output -`)
+       @time mat = reshape(raw, channels, w, h)
+       @time img = colorview(RGB{N0f8}, mat)
+[5:02:34.394801292] [371320]  INFO Camera camera_manager.cpp:284 libcamera v0.2.0+46-075b54d5
+[5:02:34.403869617] [371327]  INFO RPI pisp.cpp:662 libpisp version v1.0.4 6e3a53d137f4 14-02-2024 (14:00:12)
+[5:02:34.419988760] [371327]  INFO RPI pisp.cpp:1121 Registered camera /base/axi/pcie@120000/rp1/i2c@88000/imx708@1a to CFE device /dev/media0 and ISP device /dev/media1 using PiSP variant BCM2712_C0
+Preview window unavailable
+Mode selection for 4608:2592:12:P
+    SRGGB10_CSI2P,1536x864/0 - Score: 10600
+    SRGGB10_CSI2P,2304x1296/0 - Score: 8200
+    SRGGB10_CSI2P,4608x2592/0 - Score: 1000
+Stream configuration adjusted
+[5:02:34.424203329] [371320]  INFO Camera camera.cpp:1183 configuring streams: (0) 4608x2592-BGR888 (1) 4608x2592-BGGR16_PISP_COMP1
+[5:02:34.424301292] [371327]  INFO RPI pisp.cpp:1405 Sensor: /base/axi/pcie@120000/rp1/i2c@88000/imx708@1a - Selected sensor format: 4608x2592-SBGGR10_1X10 - Selected CFE format: 4608x2592-PC1B
+Still capture image received
+  1.050392 seconds (14.27 k allocations: 41.367 MiB)
+  0.000009 seconds (3 allocations: 128 bytes)
+  0.000008 seconds (1 allocation: 80 bytes)
+```
+
+# Next steps
+
+I think I can somewhat park this particular part of the process (improving capture speed) until after the camera is on the gantry. This step works quite well, and I've already seen examples of much higher Julia throughput working fine. No, there are two higher priorities that this simple and slow method opens the door to:
+
+1. Profiling the gantry performance. We can now use a Julia script to take images and do with them whatever we please. This is useful, because that same Julia script can control the gantry movements using James's code. (We can therefore do some optical repeatability testing if we wish.)
