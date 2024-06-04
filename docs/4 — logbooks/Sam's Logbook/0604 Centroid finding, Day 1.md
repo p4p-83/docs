@@ -163,3 +163,58 @@ I'm also noticing that Julia is slow to run code the first time, but faster in s
 — Actually, that's not a bad idea… can OpenCV do this part? Can it do something sufficiently similar? How do CV people do this sort of thing?
 
 — Addendum: thanks for these *Algovision* PCBs, James. They are proving surprisingly useful for algorithm visualisation.
+
+# Lighting tests
+
+This wouldn't actually be complete without some form of lighting test. I've since realised that the front-facing 'Algovision' text on the RHS PCB is metal, not silk and is therefore expected to show in the mask. (Yeah, duh.)
+
+Here's the input.
+
+![](withtorchandpaper.png)
+
+I've got a piece of paper just above the camera and I'm shining a torch at it from above. This provides a diffused white light source across a limited angle.
+
+Here's the code.
+
+```julia
+using Images
+
+img = load("withtorchandpaper.png")
+
+function threshold(img, lower, upper)
+
+	# extract underlying
+	mat = reinterpret.(UInt8, N0f8.(channelview(img)))
+
+	# red channel only
+	r = mat[1,:,:]
+
+	# threshold it
+	a = [
+		if px < lower
+			UInt8(0)
+		elseif px > upper
+			UInt8(0)
+		else
+			UInt8(255)
+		end
+	for px in r]
+
+	# reinterpret as fixed-point
+	b = reinterpret.(N0f8, a)
+
+	# get as an image
+	colorview(Gray{N0f8}, b)
+end
+
+@time img2 = threshold(img, 150, 245)
+# 0.035001 seconds (9 allocations: 68.344 MiB, 2.80% gc time)
+
+save("withtorchandpaper_mask.png", img2)
+```
+
+Here's the output.
+
+![](withtorchandpaper_mask.png)
+
+Not even half bad! That's a really clean mask. (Just a shame that our real device will be using solder paste, not the raw silvery plating.)
