@@ -145,7 +145,7 @@ This technique isn't as easy as I might have first hoped. There are a few things
 
 - Proper lighting. I don't have this set up yet. I suspect we'll have to work out how to light the board to provide the required contrast. This is something that will have to be considered in conjunction with the mechanical design of the machine.
 - Some analysis of the optical properties of solder paste. Most importantly: what does it do differently from everything else on a PCB? How would we light it to make it look as different/distinct as possible?
-- Consider using Photoshop to process sample images to allow us to experiment with existing effects more.
+- Consider using software like Photoshop or DaVinci Resolve to process sample images to allow us to experiment with existing effects more.
 - Or, can we reframe the question? Instead of selecting *for* the pads, could we select *against* the other features as much as possible, both in this step and in the other steps? This step doesn't exist in isolation, and in theory all we care about is that the final snapping is reliable — not necessarily that we can 100% clean the data at this point. Could we clean it earlier? Could it be permissible to clean it later?
 - What other strategies exist? How much effort do we put into them at this point in time?
 - How do engineers discern paste from the rest of the board? (This sounds stupid, but it ties into the above point about what makes it different — the texture, perhaps? If that is the case, we could try to replace this tone detection step at least in part with a texture detection step.)
