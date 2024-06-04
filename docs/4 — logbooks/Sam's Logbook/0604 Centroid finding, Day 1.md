@@ -154,6 +154,10 @@ For reference, here's the input image used to generate that final heatmap image 
 
 ![](download-5.png)
 
+And here using `save("testimage.png", img)`. This method provides a noticeably sharper image, which is a bit odd. I only chose to try this method to try and manage the colours a little better and avoid unnecessary degradation. Perhaps I should use `save(` more frequently for the documentation, instead of the (admittedly much more convenient) method of dragging/dropping out of the VS Code side panel that automatically shows up.
+
+![](testimage.png)
+
 I'm also noticing that Julia is slow to run code the first time, but faster in subsequent iterations. These times I have noted as comments in the above scripts. Note that this is all running on the Raspberry Pi 5. It can be seen that it's easy to absolutely tank the execution speed of the thresholding algorithm. I'm starting to think that it's incredibly unrealistic to expect the CV algorithm to run anywhere near 30 fps. I'm also starting to wonder if I'll be forced to either optimise the Julia code, or switch to C++ anyway. (That, or perhaps OpenCV has some sufficiently similar, hand-optimised algorithms to offer?)
 
 — Actually, that's not a bad idea… can OpenCV do this part? Can it do something sufficiently similar? How do CV people do this sort of thing?
