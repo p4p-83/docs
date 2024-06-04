@@ -218,3 +218,13 @@ Here's the output.
 ![](withtorchandpaper_mask.png)
 
 Not even half bad! That's a really clean mask. (Just a shame that our real device will be using solder paste, not the raw silvery plating.)
+
+Adjusting the thresholds, I can get a mask of the solder mask layer. (Same exposure, with lower bound 10 and upper bound 55.)
+
+![](withtorchandpaper_maskmask.png)
+
+Or even the silkscreen / overlay layer, although there's a bit of tonal overlap so this mask is nowhere near as clean (the copper / metal layer bleeds in). I guess that choosing the lighting is therefore a bit of a compromise: the lighting that creates a clean mask for one layer may not be the same kind of lighting to get the cleanest mask of a different layer. This one is from 55 to 150.
+
+![](withtorchandpaper_silkmask.png)
+
+At any rate, the technique is more promising than I originally gave it credit for, and that all came down to actually paying in a few minutes' thought to the lighting. I'm sure with some more testing and a bit of prototyping I could improve these masks further. I guess I just need some paste now!
