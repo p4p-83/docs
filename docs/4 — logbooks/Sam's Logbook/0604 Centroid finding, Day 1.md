@@ -170,6 +170,9 @@ This wouldn't actually be complete without some form of lighting test. I've sinc
 
 Here's the input.
 
+- Gloss black 1 mm from PCB Way.
+- Blue 1 mm from JLC PCB.
+
 ![](withtorchandpaper.png)
 
 I've got a piece of paper just above the camera and I'm shining a torch at it from above. This provides a diffused white light source across a limited angle.
