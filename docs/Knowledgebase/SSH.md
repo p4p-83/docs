@@ -60,5 +60,8 @@ Ngrok also allows you to get a static domain, but unfortunately this only works 
 
 # Enabling or disabling password access
 
-> [!info] Merge conflict
-> James — you can add your changes re. password access in here if you wish. Sorry for the hassle, but I did want to jot the above down.
+```sh
+sudo vi /etc/ssh/sshd_config
+# PasswordAuthentication yes
+systemctl restart sshd.service
+```
