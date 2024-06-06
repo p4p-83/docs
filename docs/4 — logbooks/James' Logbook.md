@@ -306,6 +306,7 @@ sudo diskutil unmount /Volumes/rpi
 - Caved and bought a micro HDMI cable from PB Tech
 - Connected to the network through the OS, and managed to SSH into it using the IP address
 - Nice!
+- `hostname -I | awk '{print $1}'`
 
 - Reading through Sam's _The First Quarter_ proposal
 
@@ -819,4 +820,226 @@ sudo diskutil unmount /Volumes/rpi
 - Meeting with Sam to discuss next steps, project plan, etc.
 - ![[Pasted image 20240511221503.png]]
 
+## Tue 4 Jun
 
+- I don't think I've touched this for a month...
+- Cleaned the desk today!
+
+- Will figure out the next step...
+- I'm not actually sure if it's worth doing a keyboard API?
+
+## Wed 5 Jun
+
+- Adding a very primitive `KeyboardApi`
+- Ripped the Micro B head off 😂
+- Meeting with Sam to
+	- Get Julia set up
+	- Discuss the next steps
+	- Set up remote VS Code + Julia extension
+	- Set up ngrok tunnelling
+
+### Next Steps
+
+- Re-write gantry to use fixed time slices
+
+- Start with fly-by-wire
+	- User clicks on a screen interface, the gantry drives to that position
+		- Protocols?
+	- Start working on interface
+- _After_ fly-by-wire, next step is to add snapping
+
+- Will need to add some handshaking mechanism between the components
+	- Use EOF for synchronisation with a `read()`?
+
+- Use camera to take photos... then do some onion-skin type thing to see how consistent it is
+
+## Thu 5 Jun
+
+- Working on next steps
+
+- Running repeatability tests
+	- Connecting HQ camera to Pi, using `rpicam-vid` as a viewfinder, and moving the gantry with Julia
+	- Then using Julia to take still shots with `libcamera-still`
+	- Still need to update the gantry firmware though
+
+- Talking to Nitish about our progress
+	-  Looked at the microstepping DIP switches
+		- We are somewhere in the middle right now, neither zero microstepping nor max microstepping
+	- He suggested buying a new gantry if needed rather than trying to rebuild this one
+
+### Repeatability Tests
+
+> [!summary]
+> These are pretty good!!!
+> There is definitely noticeable drift, however, these tests were taken without securing the gantry—and there was obvious and noticeable movement caused by the deceleration of the steppers.
+> 
+> This is an encouraging result however, and does not immediately prove non-viability.
+
+![[s-X169000-Y110000.png]]
+
+![[Pasted image 20240606205324.png]]
+
+![[Pasted image 20240606205514.png]]
+
+![[Pasted image 20240606205556.png]]
+
+![[Pasted image 20240606205404.png]]
+
+![[Pasted image 20240606205416.png]]
+
+![[Pasted image 20240606205306.png]]
+
+![[Pasted image 20240606205614.png]]
+
+```julia
+using Images
+using ImageIO
+
+# Function to adjust opacity of an image
+function adjustOpacity(img, alpha)
+    return map(c -> RGB{N0f8}(c.r * alpha, c.g * alpha, c.b * alpha), img)
+end
+
+# Base path of the images
+basePath = "/Users/james/Downloads/Repeatability/"
+
+positions = [
+    16.9 11 0
+    18 11 0
+    19 10 0
+    19 12.5 0
+    18.75 15 0
+    18.75 20 0
+    17.25 19.50 0
+    14.5 13.6 0
+] .* 10000
+positions = Int.(positions)
+
+for coord in eachrow(positions)
+
+    # Initialize the stacked image
+    stackedImage = nothing
+
+    samples = 19
+    # Read and stack each image with 20% opacity
+    for n in 1:samples
+        # Construct the filename
+        filename = "$basePath/$n-X$(coord[1])-Y$(coord[2]).png"
+
+        # Read the image
+        img = load(filename)
+
+        # Adjust opacity
+        opacity = adjustOpacity(img, (1 / samples))
+
+        # Stack the image
+        if isnothing(stackedImage)
+            stackedImage = opacity
+        else
+            stackedImage .= stackedImage .+ opacity
+        end
+    end
+
+    # Ensure the stacked image is normalized between 0 and 1
+    stackedImage = clamp01.(stackedImage)
+
+    # Save the resulting stacked image
+    save("s-X$(coord[1])-Y$(coord[2]).png", stackedImage)
+
+end
+```
+
+```julia
+using LibSerialPort
+using Images
+
+# run(`echo "a" > /dev/tty.usbserial-10`)
+f = open("/dev/ttyUSB0", 115200)
+
+##
+
+write(f, "G28\n")
+
+##
+
+positions = 10000 .* [
+    10 10 0
+    12.5 10 0
+    15 12.5 0
+    15 15 0
+    12.5 17.5 0
+    10 17.5 0
+    7.5 15 0
+    7.5 12.5 0
+]
+positions = [
+    16.9 11 0
+    18 11 0
+    19 10 0
+    19 12.5 0
+    18.75 15 0
+    18.75 20 0
+    17.25 19.5 0
+    14.5 13.6 0
+] .* 10000
+positions = Int.(positions)
+
+write(f, "G0 X$(positions[1,1]) Y$(positions[1,2]) Z$(positions[1,3])\n");
+sleep(5)
+
+for i = 1:20
+    for coord in eachrow(positions)
+        @time write(f, "G0 X$(coord[1]) Y$(coord[2]) Z$(coord[3])\n")
+        sleep(4)
+        @time img = capture(1 / 3)
+        save("Repeatability/$(i)-X$(coord[1])-Y$(coord[2]).png", img)
+    end
+end
+
+##
+
+function capture(shutter=12e-3)
+    w = 4056
+    h = 3040
+    channels = 3 # RGB
+    raw = read(`libcamera-still --nopreview --shutter=$(shutter)s --denoise=cdn_fast --immediate --encoding=rgb --output=-`)
+    mat = permutedims(reshape(raw, channels, w, h), (1, 3, 2))
+    colorview(RGB{N0f8}, mat)
+end
+
+@time img = capture(1 / 3)
+
+##
+
+close(f)
+```
+
+![[Pasted image 20240606210021.png]]
+
+```julia
+# get image size
+img = load("1-X180000-Y110000.png")
+sum = zeros(Int, size(channelview(img))[2:3]...)
+
+# set total number available
+count = 20
+
+for n=1:count
+
+    println("adding $n")
+
+    img = load("$n-X180000-Y110000.png")
+    mask = threshold(img, 155, 250)
+
+    sum .+= channelview(mask)
+
+end
+
+composite = clamp01.(sum) ./2
+composite .+= mask ./ 2
+compimg = colorview(Gray, composite)
+
+save("composite.png", compimg)
+```
+
+- Using tape to secure the gantry down
