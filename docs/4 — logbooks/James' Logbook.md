@@ -862,6 +862,82 @@ sudo diskutil unmount /Volumes/rpi
 	- Then using Julia to take still shots with `libcamera-still`
 	- Still need to update the gantry firmware though
 
+```julia
+using LibSerialPort
+using Images
+
+##
+
+function capture(shutter=12e-3)
+    w = 4056
+    h = 3040
+    channels = 3 # RGB
+    raw = read(`libcamera-still --nopreview --shutter=$(shutter)s --denoise=cdn_fast --immediate --encoding=rgb --output=-`)
+    mat = permutedims(reshape(raw, channels, w, h), (1, 3, 2))
+    colorview(RGB{N0f8}, mat)
+end
+
+##
+
+# run(`echo "a" > /dev/tty.usbserial-10`)
+f = open("/dev/ttyUSB1", 115200)
+
+##
+
+write(f, "G28\n")
+
+##
+
+# positions = 10000 .* [
+#     10 10 0
+#     12.5 10 0
+#     15 12.5 0
+#     15 15 0
+#     12.5 17.5 0
+#     10 17.5 0
+#     7.5 15 0
+#     7.5 12.5 0
+# ]
+positions = [
+    14.3 11.4 0
+    15.7 11.5 0
+    16.4 10.2 0
+    16.2 13 0
+    16 15.8 0
+    17.6 20.9 0
+    13.2 23 0
+    13.2 21.9 0
+    12.1 14 0
+] .* 10000
+positions = Int.(positions)
+
+write(f, "G0 X$(positions[1,1]) Y$(positions[1,2]) Z$(positions[1,3])\n");
+sleep(5)
+
+##
+
+for j = 1:3
+    for i = 1:30
+        for coord in eachrow(positions)
+            @time write(f, "G0 X$(coord[1]) Y$(coord[2]) Z$(coord[3])\n")
+            sleep(6)
+            @time img = capture(1 / 3)
+            save("Repeatability/$(j)-$(i)-X$(coord[1])-Y$(coord[2]).png", img)
+        end
+    end
+    write(f, "G28\n")
+    sleep(10)
+end
+
+##
+
+# @time img = capture(1 / 3)
+
+##
+
+close(f)
+```
+
 - Talking to Nitish about our progress
 	-  Looked at the microstepping DIP switches
 		- We are somewhere in the middle right now, neither zero microstepping nor max microstepping
@@ -890,6 +966,8 @@ sudo diskutil unmount /Volumes/rpi
 ![[Pasted image 20240606205306.png]]
 
 ![[Pasted image 20240606205614.png]]
+
+#### Colour Composites
 
 ```julia
 using Images
@@ -949,97 +1027,122 @@ for coord in eachrow(positions)
 end
 ```
 
-```julia
-using LibSerialPort
-using Images
+#### Sam's Greyscale Range Composites
 
-# run(`echo "a" > /dev/tty.usbserial-10`)
-f = open("/dev/ttyUSB0", 115200)
-
-##
-
-write(f, "G28\n")
-
-##
-
-positions = 10000 .* [
-    10 10 0
-    12.5 10 0
-    15 12.5 0
-    15 15 0
-    12.5 17.5 0
-    10 17.5 0
-    7.5 15 0
-    7.5 12.5 0
-]
-positions = [
-    16.9 11 0
-    18 11 0
-    19 10 0
-    19 12.5 0
-    18.75 15 0
-    18.75 20 0
-    17.25 19.5 0
-    14.5 13.6 0
-] .* 10000
-positions = Int.(positions)
-
-write(f, "G0 X$(positions[1,1]) Y$(positions[1,2]) Z$(positions[1,3])\n");
-sleep(5)
-
-for i = 1:20
-    for coord in eachrow(positions)
-        @time write(f, "G0 X$(coord[1]) Y$(coord[2]) Z$(coord[3])\n")
-        sleep(4)
-        @time img = capture(1 / 3)
-        save("Repeatability/$(i)-X$(coord[1])-Y$(coord[2]).png", img)
-    end
-end
-
-##
-
-function capture(shutter=12e-3)
-    w = 4056
-    h = 3040
-    channels = 3 # RGB
-    raw = read(`libcamera-still --nopreview --shutter=$(shutter)s --denoise=cdn_fast --immediate --encoding=rgb --output=-`)
-    mat = permutedims(reshape(raw, channels, w, h), (1, 3, 2))
-    colorview(RGB{N0f8}, mat)
-end
-
-@time img = capture(1 / 3)
-
-##
-
-close(f)
-```
+> [!info]
+> See [[0606 Repeatability testing composites]]
 
 ![[Pasted image 20240606210021.png]]
 
 ```julia
-# get image size
-img = load("1-X180000-Y110000.png")
-sum = zeros(Int, size(channelview(img))[2:3]...)
+using Images
+using ImageIO
 
-# set total number available
-count = 20
+function threshold(img, lower, upper)
 
-for n=1:count
+    # extract underlying
+    mat = reinterpret.(UInt8, N0f8.(channelview(img)))
 
-    println("adding $n")
+    # red channel only
+    r = mat[1, :, :]
 
-    img = load("$n-X180000-Y110000.png")
-    mask = threshold(img, 155, 250)
+    # threshold it
+    a = [
+        if px < lower
+            UInt8(0)
+        elseif px > upper
+            UInt8(0)
+        else
+            UInt8(255)
+        end
+        for px in r]
 
-    sum .+= channelview(mask)
+    # reinterpret as fixed-point
+    b = reinterpret.(N0f8, a)
 
+    # get as an image
+    colorview(Gray{N0f8}, b)
 end
 
-composite = clamp01.(sum) ./2
-composite .+= mask ./ 2
-compimg = colorview(Gray, composite)
+# Base path of the images
+basePath = "/Users/james/Downloads/Repeatability 2/"
+basePath = "/Users/james/Desktop/Repeatability/"
 
-save("composite.png", compimg)
+# positions = [
+#     16.9 11 0
+#     18 11 0
+#     19 10 0
+#     19 12.5 0
+#     18.75 15 0
+#     18.75 20 0
+#     17.25 19.50 0
+#     14.5 13.6 0
+# ] .* 10000
+positions = [
+    14.3 11.4 0
+    15.7 11.5 0
+    16.4 10.2 0
+    16.2 13 0
+    16 15.8 0
+    17.6 20.9 0
+    13.2 23 0
+    13.2 21.9 0
+    12.1 14 0
+] .* 10000
+positions = Int.(positions)
+
+for coord in eachrow(positions)
+
+    # get image size
+    filename = "$basePath/1-1-X$(coord[1])-Y$(coord[2]).png"
+    img = load(filename)
+    sum = zeros(Int, size(channelview(img))[2:3]...)
+
+    # set total number available
+    count = 5
+
+    mask = nothing
+    for n = 1:count
+
+        println("adding $n")
+
+        img = load(filename)
+        mask = threshold(img, 155, 250)
+
+        sum .+= channelview(mask)
+
+    end
+
+    composite = clamp01.(sum) ./ 2
+    composite .+= mask ./ 2
+    compimg = colorview(Gray, composite)
+
+    save("docs/4 — Logbooks/.vs/u-X$(coord[1])-Y$(coord[2]).png", compimg)
+
+end
 ```
 
+---
+
 - Using tape to secure the gantry down
+
+- i’ve left it set up for a 3x of (go-home + (30x iterations of (9 points-of-interest)))… but no point leaving it running cause the lights will turn off
+- so tomorrow morning:
+```sh
+ssh -p 13874 0.tcp.au.ngrok.io
+
+cd Desktop
+julia test.jl & # in the background so it doesn’t die if i disconnect from ssh
+```
+
+- before I left though, I did manage to take 5 iterations, which produced this ([[0606 Repeatability testing composites|Sam's range code]]):
+	- ![[Pasted image 20240607003105.png]]
+	- ![[Pasted image 20240607003112.png]]
+	- ![[Pasted image 20240607003117.png]]
+	- ![[Pasted image 20240607003127.png]]
+	- ![[Pasted image 20240607003135.png]]
+	- ![[Pasted image 20240607003144.png]]
+	- ![[Pasted image 20240607003149.png]]
+	- ![[Pasted image 20240607003154.png]]
+	- ![[Pasted image 20240607003202.png]]
+	- encouraging! though I'm now interested in what error accumulates each time the machine zeroes... which I'll find out in the full test tomorrow
