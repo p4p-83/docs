@@ -1066,7 +1066,6 @@ end
 
 # Base path of the images
 basePath = "/Users/james/Downloads/Repeatability 2/"
-basePath = "/Users/james/Desktop/Repeatability/"
 
 # positions = [
 #     16.9 11 0
@@ -1106,7 +1105,7 @@ for coord in eachrow(positions)
 
         println("adding $n")
 
-        img = load(filename)
+        img = load("$basePath/1-$n-X$(coord[1])-Y$(coord[2]).png")
         mask = threshold(img, 155, 250)
 
         sum .+= channelview(mask)
@@ -1146,3 +1145,652 @@ julia test.jl & # in the background so it doesn’t die if i disconnect from ssh
 	- ![[Pasted image 20240607003154.png]]
 	- ![[Pasted image 20240607003202.png]]
 	- encouraging! though I'm now interested in what error accumulates each time the machine zeroes... which I'll find out in the full test tomorrow
+
+## Fri 7 Jun
+
+- Grabbing results of repeatability test
+
+### Updated Test
+
+```julia
+using LibSerialPort
+using Images, Dates
+
+##
+
+function capture(shutter=12e-3)
+    w = 4056
+    h = 3040
+    channels = 3 # RGB
+    raw = read(`libcamera-still --nopreview --shutter=$(shutter)s --denoise=cdn_fast --immediate --encoding=rgb --output=-`)
+    mat = permutedims(reshape(raw, channels, w, h), (1, 3, 2))
+    colorview(RGB{N0f8}, mat)
+end
+
+##
+
+# run(`echo "a" > /dev/tty.usbserial-10`)
+f = open("/dev/ttyUSB1", 115200)
+
+##
+
+write(f, "G28\n")
+
+##
+
+# positions = 10000 .* [
+#     10 10 0
+#     12.5 10 0
+#     15 12.5 0
+#     15 15 0
+#     12.5 17.5 0
+#     10 17.5 0
+#     7.5 15 0
+#     7.5 12.5 0
+# ]
+positions = [
+    14.3 11.4 0
+    15.7 11.5 0
+    16.4 10.2 0
+    16.2 13 0
+    16 15.8 0
+    17.6 20.9 0
+    13.2 23 0
+    13.2 21.9 0
+    12.1 14 0
+] .* 10000
+positions = Int.(positions)
+
+write(f, "G0 X$(positions[1,1]) Y$(positions[1,2]) Z$(positions[1,3])\n");
+sleep(5)
+
+##
+
+coldstarts = 5
+spins = 30
+
+for j = 1:coldstarts
+    for i = 1:spins
+        for k = 1:size(positions)[1]
+            coord = positions[k, :]
+            @time write(f, "G0 X$(coord[1]) Y$(coord[2]) Z$(coord[3])\n")
+            sleep(6)
+            @time img = capture(1 / 3)
+            save("/media/james/STRONTIUM/Repeatability/$j-$i-$k.png", img)
+            open("/media/james/STRONTIUM/Repeatability/testing_log.txt", "a") do logfile
+                println(logfile, "$(Dates.format(now(), "d u yy HH:MM:SS")): captured with j=$j, i=$i, and k=$k")
+                println(logfile, "G0 X$(coord[1]) Y$(coord[2]) Z$(coord[3])\n")
+            end
+        end
+    end
+    write(f, "G28\n")
+    sleep(10)
+end
+
+##
+
+# @time img = capture(1 / 3)
+
+##
+
+close(f)
+```
+
+- Some minor changes:
+  - Writing directly to my USB so I don't run out of disk space on my 16GB SD card
+  - Naming the images with `k` rather than the coordinate
+  - Sam also added a `testing_log.txt`
+  
+### Analysing Incomplete 'Fixed' Tests
+
+#### A note
+
+Previously, I was saving images as `{coldStart}-{spin}-X{xCoord}-Y{yCoord}.png`.
+This is kinda stink from a code perspective, as it means that the processor must be aware of the `positions` matrix.
+I've consequently changed the test script directly above to index the `positions` matrix with an incrementor `k`, and saving the image files as `{coldStart}-{spin}-{positionOfInterest}.png`.
+
+This change has been applied for the full test run that I began once I got into the lab at noon, but, this naming change wasn't applied to the partial test run that Sam began earlier in the morning.
+Hence, there is a need for the below script to rename the image files.
+
+```julia
+using Images
+using ImageIO
+
+# Base path of the images
+basePath = "/Users/james/Desktop/Repeatability"
+
+positions = [
+    14.3 11.4 0
+    15.7 11.5 0
+    16.4 10.2 0
+    16.2 13 0
+    16 15.8 0
+    17.6 20.9 0
+    13.2 23 0
+    13.2 21.9 0
+    12.1 14 0
+] .* 10000
+positions = Int.(positions)
+
+coldStarts = 2
+spins = 30
+pointsOfInterest = 9
+
+for i = 1:coldStarts
+	for j = 1:spins
+		for k = 1:pointsOfInterest
+			coord = positions[k, :]
+			# get image size
+			img = load("$basePath/$i-$j-X$(coord[1])-Y$(coord[2]).png")
+			save("$basePath/$i-$j-$k.png", img)
+		end
+	end
+end
+```
+
+#### Therefore
+
+```julia
+using Images
+using ImageIO
+
+function threshold(img, lower, upper)
+
+    # extract underlying
+    mat = reinterpret.(UInt8, N0f8.(channelview(img)))
+
+    # red channel only
+    r = mat[1, :, :]
+
+    # threshold it
+    a = [
+        if px < lower
+            UInt8(0)
+        elseif px > upper
+            UInt8(0)
+        else
+            UInt8(255)
+        end
+        for px in r]
+
+    # reinterpret as fixed-point
+    b = reinterpret.(N0f8, a)
+
+    # get as an image
+    colorview(Gray{N0f8}, b)
+end
+
+# Base path of the images
+basePath = "/Users/james/Desktop/Repeatability"
+
+coldStarts = 2
+spins = 30
+pointsOfInterest = 9
+
+for i = 1:coldStarts
+	for k = 1:pointsOfInterest
+
+		# get image size
+		filename = "$basePath/$i-$k-1.png"
+		img = load(filename)
+		sum = zeros(Int, size(channelview(img))[2:3]...)
+
+		mask = nothing
+		for n = 1:spins
+
+			println("adding $n")
+
+			filename = "$basePath/$i-$n-$k.png"
+			img = load(filename)
+			mask = threshold(img, 155, 250)
+
+			sum .+= channelview(mask)
+
+		end
+
+		composite = clamp01.(sum) ./ 2
+		composite .+= mask ./ 2
+		compimg = colorview(Gray, composite)
+
+		save("docs/4 — Logbooks/.vs/$i-s-$k.png", compimg)
+
+	end
+end
+```
+
+#### Rainbow Analysis
+
+```julia
+using Images
+using ImageIO
+
+function threshold(img, lower, upper)
+
+    # extract underlying
+    mat = reinterpret.(UInt8, N0f8.(channelview(img)))
+
+    # red channel only
+    r = mat[1, :, :]
+
+    # threshold it
+    a = [
+        if px < lower
+            UInt8(0)
+        elseif px > upper
+            UInt8(0)
+        else
+            UInt8(255)
+        end
+        for px in r]
+
+    # reinterpret as fixed-point
+    b = reinterpret.(N0f8, a)
+
+    # get as an image
+    colorview(Gray{N0f8}, b)
+end
+
+# Base path of the images
+basePath = "/Users/james/Desktop/Repeatability"
+
+coldStarts = 2
+spins = 30
+pointsOfInterest = 9
+
+for i = 1:coldStarts
+	for k = 1:pointsOfInterest
+
+		# get image size
+		filename = "$basePath/$i-$k-1.png"
+		img = load(filename)
+		sum = zeros(Int, size(channelview(img))[2:3]...)
+
+		hero = spins
+		bg = HSV(0,0,0)
+
+		w = 4056
+		h = 3040
+		colours = fill(bg, h, w)
+
+		# mask = nothing
+		for n=1:spins
+
+			println(n)
+
+			filename = "$basePath/$i-$n-$k.png"
+			mask = threshold(load(filename), 155, 250)
+			hue = (n-1)*360/spins
+			
+			colours[mask .> 0] .= HSV(hue, 0.8, 0.8)
+
+		end
+
+		heromask = threshold(load("$basePath/$i-$hero-$k.png"), 155, 250)
+		colours[heromask .> 0] .= HSV(0, 0, 1)
+
+		# display(colours)
+		save("docs/4 — Logbooks/.vs/$i-c-$k.png", colours)
+
+	end
+end
+```
+
+### My Next Steps
+
+- My next steps are to
+	- Begin working on the web interface
+	- Re-write the firmware (can wait)
+
+- I will also detach the fork of `p4p-83/gantry`
+
+### Interface
+
+- Most likely to be built using the [`<canvas>`](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) API?
+- Maybe [WebGL](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API) so I can utilise hardware acceleration
+
+- Do I want to use React or something?
+
+- Collecting interesting links
+- Could be a play to use a tiling map interface, composed of still images...
+
+> [!todo]
+> What do existing PnP interfaces look like?
+
+#### Video Streaming
+
+- I'll park the interface research for now, and just get a barebones link working so we can start quantifying the round-trip latency
+
+https://codecalamity.com/a-raspberry-pi-streaming-camera-using-mpeg-dash-hls-or-rtsp/
+
+- Running the script
+- Hm, the `stream_camera` service does not start correctly... `ffmpeg` seems to complain about the `-i` argument
+
+- I've just been completely stabbing in the dark... I should probably do some research into codecs/containers/formats etc.
+- https://www.youtube.com/watch?v=-4NXxY4maYc
+- https://www.youtube.com/watch?v=0Mds4-ggpNI
+
+- It seems like the best option might actually be the `rpicam-vid` streaming I figured out at the very beginning (if we choose to do livestreaming at all).
+- This latency is about as good as the RTSP blog post claims, and I know that it works
+
+- Researching other people who have tried to reduce latency
+	- https://forums.raspberrypi.com/viewtopic.php?t=335940
+	- https://forums.raspberrypi.com/viewtopic.php?p=1695053#p1695053
+	- https://stackoverflow.com/questions/16750395/raspberry-pi-no-delay-10ms-video-stream
+
+https://gektor650.medium.com/comparing-video-stream-latencies-raspberry-pi-5-camera-v3-a8d5dad2f67b
+
+## Sat 8 Jun
+
+### Video Streaming
+
+- Trying some of the things I saved last night...
+
+#### Flushing after write (TCP)
+
+```sh
+rpicam-vid -t 0 --inline --listen -o tcp://0.0.0.0:2121 --nopreview --flush --width 800 --height 600 --framerate 10
+
+ffplay -probesize 32 -analyzeduration 0 -fflags nobuffer -fflags flush_packets -flags low_delay -framerate 10 -framedrop tcp:/172.23.126.145:2121
+```
+- Still rubbish
+
+#### rpicam-vid + FFmpeg RTSP
+
+```sh
+rpicam-vid -t 0 --camera 0 --nopreview --codec yuv420 --width 800 --height 600 --inline --listen -o - | ffmpeg -f rawvideo -pix_fmt yuv420p -s:v 800x600 -i /dev/stdin -c:v libx264 -preset ultrafast -tune zerolatency -f rtsp rtsp://localhost:8554/stream
+
+# IINA to receive RTSP
+```
+- Doesn't work?
+	- Edit later: Sam mentioned that YUV is somewhat particular about resolutions, I discovered later that it _did_ work with 640x480
+
+#### rpicam-vid + FFmpeg RTSP + mediaMTX
+
+See https://arc.net/l/quote/brjohqmq
+
+- There is over 6 seconds of latency...
+
+#### rpicam-vid + FFmpeg RTSP + mediaMTX (WebRTC)
+
+- Holy shit!
+- https://arc.net/l/quote/elmpojaw
+
+- https://discord.com/channels/1154647250144870412/1154647251193434165/1248794096412266658
+- This is pretty freaking good!
+
+- Can change resolution to 1080p, no perceivable additional delay
+- Also 60fps!
+
+- I'll get the `.yml` added to a git repo so it can be reproduced easily in the future
+
+- Probably a good idea to go through and remove the stuff that isn't needed
+
+### SSH Forwarding
+
+- To clone private repositories from the Pi, I can use SSH agent forwarding to use my local SSH keys such that I don't need to add/create new ones on the Pi.
+- This _should_ have already been enabled (ie `ForwardAgent yes`) was already in my `~/.ssh/config` for the respective host
+- However, the key was not listed by `ssh-add -L`, ie it was not added
+- This is because `ssh-agent` forgets keys once restarted on reboot on macOS
+- Fixed by running
+	```sh
+	ssh-add --apple-use-keychain ~/.ssh/jamesnzl.key
+	```
+- See https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding#your-key-must-be-available-to-ssh-agent
+
+### Video Streaming
+
+- Now that it works on the Pi, I can go home and just use MediaMTX to display a video stream of my laptop webcam
+
+- I tried to use `ffmpeg` to read the `avfoundation` FaceTime webcam, but it wouldn't play nicely with Arc for some reason
+- Not to fret, I can [stream to the server from my browser](https://github.com/bluenviron/mediamtx?tab=readme-ov-file#web-browsers)
+- This works well!
+
+### Interface
+
+I'll start by trying to get this video stream into a basic HTML shell, similar to the WebRTC MediaMTX endpoint?
+
+![[Pasted image 20240608180543.png]]
+![[Pasted image 20240608180549.png]]
+
+- It looks like there's an empty `<video>` tag, that has JavaScript code to populate it?
+- I will need to read more into WebRTC
+- https://cloudinary.com/blog/guest_post/stream-videos-with-webrtc-api-and-react
+
+- You can embed the WebRTC feed in an `iframe`
+- Oh cool, https://arc.net/l/quote/spnpcwtc MediaMTX gives you the option to read it out directly as a WHEP thing so you don't need the `iframe`
+- https://github.com/Eyevinn/webrtc-player this works quite well ([demo](https://webrtc.player.eyevinn.technology/))
+
+- I wonder if I can use the stats/other mechanism to pass position information along with the video?
+
+- Cool, I've now got a basic prototype working. I do want to bootstrap it as part of a Next.js project, for dev-ex + extensibility
+- Using shadcn/ui because it's objectively goated
+
+![[Pasted image 20240609025717.png]]
+![[Pasted image 20240609025731.png]]
+
+- I've been fairly clever :^) with the overlay! The overlay is also what is used for the click events, so the user cannot click out of bounds!
+- The overlay automatically re-sizes to the real-size of the video feed (ie not the `<video>` element's bounding box). This means that the overlay `<div>` perfectly aligns with the video feed, allowing me to apply a `cursor: crosshair` only within the valid clickable range.
+- Similarly, I can apply a `'click'` event handler, and know that it will only work atop the video feed.
+
+![[Capture 2024-06-09 at 03.12.41.png]]
+- Normalising the click to be centred about the head position
+
+https://discord.com/channels/1154647250144870412/1214522805123682314/1249022702283522069
+
+- Okay, it's 4am.
+- I should sleep.
+
+- Tomorrow (today 💀) I want to look at trying to pass data back and forth alongside the video... ie can I piggy-back the WebRTC connection to pass head position/target position?
+
+## Sun 9 Jun
+
+### Interface
+
+- First adding a loading bar for the `WebRtcVideo` component ✨
+
+- Hm, okay
+	- `webrtc-player` [once](https://github.com/Eyevinn/webrtc-player/issues/5) had support for data channels between the broadcaster and player, but [this has been removed](https://github.com/Eyevinn/webrtc-player/pull/13)
+	- `mediamtx` [does not](https://github.com/bluenviron/mediamtx/discussions/3052) have support for data channels (also [this](https://github.com/bluenviron/mediamtx/discussions/1456)).
+
+- If we choose to use WebRTC too, I will need to open a separate connected in parallel...
+
+- I suppose this is fine—ultimately we will have our (Julia?) controller, which will be streaming the interface-addressed video feed into MediaMTX anyway—so we really just achieve the bypassing of MediaMTX as a middleman.
+- This means that, for now, I can probably look at trying to use Julia to create the WebRTC connection with my frontend, and passing the position information back-and-forth.
+
+- https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Using_data_channels
+
+- I should probably start by reading properly into WebRTC, if I'm signing the dotted line...
+	- https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols
+
+### WebRTC
+
+- Built atop lots of protocols!
+
+#### ICE
+
+- Interactive Connectivity Establishment
+
+- Allows web browser to connect with peers
+- Commonly used for interactive media scuh as VoIP, p2p, video, IM
+- Communicating through a central server would be slow and expensive
+
+- Direct communication between clients on the Internet is tricky
+	- Network address translators (NATs)
+		- Delayed exhaustion of IPv4 address pool (~4bil unique addresses)
+	- Firewalls that may prevent connections
+	- Needs to give you a unique public address (not usually pre-existing)
+	- Relay through a server if your router doesn't allow you to directly connect with peers
+	- Other network barriers
+- Published as RFC 8445
+- August 2018
+
+- Provides a framework for a communicating peer to discover and communicate its public IP address for other peers to reach it
+
+- Uses STUN and/or TURN servers for this
+
+#### STUN
+
+- Session Traversal Utilities for NAT
+
+- Protocol to discover your public address and determine any restrictions in your router that would prevent a direct peer connection
+
+- Client sends a request to a STUN server on the Internet
+- Server replies with the client's public address and whether the client is accessible behind the router's NAT
+
+![[Pasted image 20240609163620.png]]
+
+#### NAT
+
+- Network Address Translation
+
+- Gives your device a public IP address
+- A router has a public IP address
+- Each device connected to the router has a private IP address
+- Requests are translated from the devices' public IP to the router's public IP with a unique port
+- Devices don't need a unique public IP, but are still discoverable on the Internet
+
+- Some routers have restrictions on who can connect to devices on the network
+- Even though we have the public IP found by the STUN server, we might not be able to connect
+- We therefore need TURN
+
+#### TURN
+
+- Traversal Using Relays around NAT
+
+- Some routers have a restriction called 'Symmetric NAT'
+- Router will only accept connections from peers you have previously connected to
+
+- TURN bypasses Symmetric NAT restrictions
+- Opens a connection with a TURN server and relays information through it
+- You create a connection with a TURN server and tell peers to send packets to the TURN server, which forwards it in turn
+- Has overhead, so is a last resort
+
+#### SDP
+
+- Session Description Protocol
+
+- Standard for describing the multimedia content of the connection
+	- Resolution
+	- Formats
+	- Codecs
+	- Encryption
+	- etc.
+- Used so peers can understand each other
+- Metadata
+
+- Not a protocol, but a data format used to describe a connection that shares media between devices
+
+- Consists of one or more lines of `UTF-8` text
+- Each line begins with a one-character type
+- Then an `=` sign
+- Then structured text of a value or description
+	- Format depends on the type
+
+> [!quote]
+> https://en.wikipedia.org/wiki/Session_Description_Protocol
+> 
+> Below is a sample session description from RFC 4566. This session is originated by the user "jdoe", at IPv4 address 10.47.16.5. Its name is "SDP Seminar" and extended session information ("A Seminar on the session description protocol") is included along with a link for additional information and an email address to contact the responsible party, Jane Doe. This session is specified to last for two hours using NTP timestamps, with a connection address (which indicates the address clients must connect to or — when a multicast address is provided, as it is here — subscribe to) specified as IPv4 224.2.17.12 with a [TTL](https://en.wikipedia.org/wiki/Time_to_live "Time to live") of 127. Recipients of this session description are instructed to only receive media. Two media descriptions are provided, both using RTP Audio Video Profile. The first is an audio stream on port 49170 using RTP/AVP payload type 0 (defined by RFC 3551 as [PCMU](https://en.wikipedia.org/wiki/PCMU "PCMU")), and the second is a video stream on port 51372 using RTP/AVP payload type 99 (defined as "dynamic"). Finally, an attribute is included which maps RTP/AVP payload type 99 to format h263-1998 with a 90 kHz clock rate. [RTCP](https://en.wikipedia.org/wiki/RTCP "RTCP") ports for the audio and video streams of 49171 and 51373, respectively, are implied.
+> ```
+> v=0
+> o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+> s=SDP Seminar
+> i=A Seminar on the session description protocol
+> u=[http://www.example.com/seminars/sdp.pdf](http://www.example.com/seminars/sdp.pdf)
+> e=j.doe@example.com (Jane Doe)
+> c=IN IP4 224.2.17.12/127
+> t=2873397496 2873404696
+> a=recvonly
+> m=audio 49170 RTP/AVP 0
+> m=video 51372 RTP/AVP 99
+> a=rtpmap:99 h263-1998/90000
+> ```
+
+#### A question
+
+- Hmm... is WebRTC necessary here?
+- Is a standard WebSocket sufficient?
+	- There doesn't look to be much existing support for WebRTC in Julia
+	- I'm not _really_ trying to do media transfer here
+	- Looks like WebRTC is only really designed for browser <-> browser?
+	- I don't really want to need to create a whole TURN server
+
+- https://www.youtube.com/watch?v=p2HzZkd2A40 a _great_ video on WebRTC by Google.
+- https://www.youtube.com/watch?v=WmR9IMUD_CY Fireship WebRTC
+- https://www.youtube.com/watch?v=1BfCnjr_Vjg&t=128s Fireship WebSockets
+- https://www.youtube.com/watch?v=pnj3Jbho5Ck
+
+- Some YouTube research later—yeah, basically hit it on the nose.
+- I'll use WebSockets for real-time communication between the web browser frontend interface (the client) and the Raspberry Pi (the server), and WebRTC for low-latency video streaming.
+
+### WebSocket
+
+#### Julia Server
+
+```julia
+using HTTP.WebSockets
+
+server = WebSockets.listen("0.0.0.0", 8080) do ws
+    println("Client connected")
+    for msg in ws
+        println("Received message: ", msg)
+        send(ws, msg)
+    end
+end
+
+close(server)
+```
+
+- And it seems we have communication!
+- https://discord.com/channels/1154647250144870412/1214522805123682314/1249311422601625623
+
+#### Interface
+
+- Adding `sonner` toasts
+- https://discord.com/channels/1154647250144870412/1214522805123682314/1249358460269891759
+
+#### Server
+
+- Adjusting server to mimic some form of returned data
+- Not fully certain what this would end up looking like (where are the targets going to be added? Probably makes sense for FE?)
+- But for now, I will just try to get the click target to move towards the middle
+
+- Parse the received payload, and slowly write back the delta tending to 0
+
+```julia
+using HTTP.WebSockets
+
+server = WebSockets.listen("0.0.0.0", 8080) do ws
+    println("Client connected")
+    for msg in ws
+        println("Received message: ", msg)
+
+        msg
+        sleep(0.2)
+
+        send(ws, "ok")
+    end
+end
+
+close(server)
+```
+
+#### Data Payload
+
+- I have fixed the issue where the click position passed back to the server depends on viewport width by mapping it to the `videoHeight`/`videoWidth`
+- However, this isn't perfect, as it assumes that the video will not be scaled
+- I will instead create an invariant by parameterising a fixed `deltaRange`, say the range of an `int16_t`, where the delta position is mapped into that range
+- The controller can then convert that _known_, invariant range into its camera pixel distance
+
+```ts
+/*
+ * This normalises the delta -> the clicked target to be on a Int16 coordinate space that is
+ * - Centred at (0, 0), which should reflect the present position of the head
+ * - Maximally negative at -32,768
+ * - Maximally positive at 32,767
+ *
+ * This is done to ensure that the delta information passed back to the controller via
+ * the WebSocket is agnostic of both the client viewport and the streamed video size
+ * In other words, the burden is left to the controller to map the Int16 delta into real camera pixels
+*/
+}
+```
