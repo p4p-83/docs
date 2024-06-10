@@ -1849,6 +1849,12 @@ const MESSAGE_TAGS = Dict(
     "TARGET_DELTAS" => 0x01,
 )
 
+function generate_message(tag::UInt8, payload::Vector{UInt8})
+    pushfirst!(payload, tag)
+    println("Generated message: ", payload)
+    return payload
+end
+
 function parse_message_tag(tag::UInt8)
     for (key, value) in MESSAGE_TAGS
         if tag == value
@@ -1868,11 +1874,15 @@ function process_message(data::Vector{UInt8})
 
     println("Received message: ", message_type)
 
+    # Parse message data
     if message_type == "HEARTBEAT"
+        return generate_message(MESSAGE_TAGS["HEARTBEAT"], UInt8[])
 
-    elseif message_type == "TARGET_DELTAS"
+    if message_type == "TARGET_DELTAS"
         payload = reinterpret(Int16, data[2:end])
         println("Payload: ", payload)
+
+        return generate_message(MESSAGE_TAGS["TARGET_DELTAS"], reinterpret(UInt8, payload))
 
         # while deltas[1] != 0 || deltas[2] != 0
         #     step = Int16[0, 0]
@@ -1896,9 +1906,12 @@ server = WebSockets.listen("0.0.0.0", 8080) do socket
     for data in socket
         println("Received data: ", data)
 
-        process_message(data)
+        response = process_message(data)
+        println("Response: ", response)
 
-        send(socket, data)
+        if !isnothing(response)
+            send(socket, response)
+        end
     end
 end
 
