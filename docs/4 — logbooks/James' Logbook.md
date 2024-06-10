@@ -1847,22 +1847,29 @@ using HTTP.WebSockets
 @enum MessageType begin
     HEARTBEAT
     TARGET_DELTAS
+    MOVED_DELTAS
 end
 
 const MESSAGE_TAGS = Dict(
     HEARTBEAT => 0x00,
     TARGET_DELTAS => 0x01,
+    MOVED_DELTAS => 0x02,
 )
 
-function generate_message(type::MessageType, payload::Vector{UInt8})
+function send_message(socket::WebSocket, type::MessageType, payload::AbstractArray{UInt8})
     if !haskey(MESSAGE_TAGS, type)
         println("Invalid message type: ", type)
-        return nothing
+        return
     end
 
-    pushfirst!(payload, MESSAGE_TAGS[type])
-    println("Generated message: ", payload)
-    return payload
+    message = Vector{UInt8}(undef, length(payload) + 1)
+    message[1] = UInt8(MESSAGE_TAGS[type])
+    if length(payload) > 0
+        message[2:end] .= payload
+    end
+
+    println("Generated message: ", message)
+    WebSockets.send(socket, message)
 end
 
 function parse_message_type(tag::UInt8)::Union{MessageType, Nothing}
@@ -1874,12 +1881,12 @@ function parse_message_type(tag::UInt8)::Union{MessageType, Nothing}
     return nothing
 end
 
-function process_message(data::Any)
+function process_message(socket::WebSocket, data::Any)
     println("Non-UInt8[] data received: ", data)
     return nothing
 end
 
-function process_message(data::Vector{UInt8})
+function process_message(socket::WebSocket, data::AbstractArray{UInt8})
     message_tag = data[1]
     message_type = parse_message_type(message_tag)
 
@@ -1890,16 +1897,36 @@ function process_message(data::Vector{UInt8})
         println("Received message: ", message_type)
     end
 
-    # Parse message data
     if message_type == HEARTBEAT
-        return generate_message(HEARTBEAT, UInt8[])
+        send_message(socket, HEARTBEAT, UInt8[])
 
     elseif message_type == TARGET_DELTAS
         payload = reinterpret(Int16, data[2:end])
         println("Payload: ", payload)
-        return generate_message(TARGET_DELTAS, reinterpret(UInt8, payload))
+        
+        deltas = payload
+        while deltas[1] != 0 || deltas[2] != 0
+            step = Int16[0, 0]
+
+            for i in 1:2
+                if deltas[i] > 0
+                    actual_step = min(1000, deltas[i])
+                    deltas[i] -= actual_step
+                    step[i] = actual_step
+                elseif deltas[i] < 0
+                    actual_step = min(1000, -deltas[i])
+                    deltas[i] += actual_step
+                    step[i] = -actual_step
+                end
+            end
+
+            println("Stepped: ", step)
+            send_message(socket, MOVED_DELTAS, reinterpret(UInt8, step))
+            sleep(0.4)
+        end
 
     end
+
 end
 
 WebSockets.listen("0.0.0.0", 8080) do socket
@@ -1908,12 +1935,7 @@ WebSockets.listen("0.0.0.0", 8080) do socket
     for data in socket
         println("Received data: ", data)
 
-        response = process_message(data)
-        println("Response: ", response)
-
-        if !isnothing(response)
-            WebSockets.send(socket, response)
-        end
+        process_message(socket, data)
     end
 
 end
