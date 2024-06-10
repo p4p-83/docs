@@ -1759,15 +1759,37 @@ close(server)
 ```julia
 using HTTP.WebSockets
 
-server = WebSockets.listen("0.0.0.0", 8080) do ws
+server = WebSockets.listen("0.0.0.0", 8080) do socket
     println("Client connected")
-    for msg in ws
-        println("Received message: ", msg)
+    for data in socket
 
-        msg
-        sleep(0.2)
+        println("Received data: ", data)
 
-        send(ws, "ok")
+        if length(data) % 2 == 0 
+            deltas = reinterpret(Int16, data)
+
+            while deltas[1] != 0 || deltas[2] != 0
+                step = Int16[0, 0]
+                for i in 1:2
+                    if deltas[i] > 0
+                        actual_step = min(1000, deltas[i])
+                        deltas[i] -= actual_step
+                        step[i] = actual_step
+                    elseif deltas[i] < 0
+                        actual_step = min(1000, -deltas[i])
+                        deltas[i] += actual_step
+                        step[i] = -actual_step
+                    end
+                end
+                
+                sleep(0.1)
+                send(socket, reinterpret(UInt8, step))
+            end
+        end
+
+        send(socket, data)
+        # send(socket, "ok")
+
     end
 end
 
@@ -1793,4 +1815,92 @@ close(server)
  * In other words, the burden is left to the controller to map the Int16 delta into real camera pixels
 */
 }
+```
+
+## Mon 10 Jun
+
+### WebSocket Data Interface
+
+- I will extract the messaging logic from the `PlaceOverlay` component into its own `@/lib/socket` file
+- Command specification will be documented in code
+
+- Nice! I'm pretty happy with my messaging implementation now...
+![[Capture 2024-06-10 at 20.19.57.png]]
+
+- I have also customised the `heartbeat` message to also be a binary message (1 byte!) rather than a string
+- Also type safety 😎
+
+- I will now start improving the Julia server to better mimic the real one...
+
+https://discord.com/channels/1154647250144870412/1214522805123682314/1249641977083854908
+
+### Video Player
+
+- Oh, I need to handle the case where the player fails to connect
+- ![[Capture 2024-06-10 at 21.18.30.png]]
+
+### Julia Server
+
+```julia
+using HTTP.WebSockets
+
+const MESSAGE_TAGS = Dict(
+    "HEARTBEAT" => 0x00,
+    "TARGET_DELTAS" => 0x01,
+)
+
+function parse_message_tag(tag::UInt8)
+    for (key, value) in MESSAGE_TAGS
+        if tag == value
+            return key
+        end
+    end
+    return "INVALID"
+end
+
+function process_message(data::Any)
+    println("Non-Uint8[] data received: ", data)
+end
+
+function process_message(data::Vector{UInt8})
+    message_tag = data[1]
+    message_type = parse_message_tag(message_tag)
+
+    println("Received message: ", message_type)
+
+    if message_type == "HEARTBEAT"
+
+    elseif message_type == "TARGET_DELTAS"
+        payload = reinterpret(Int16, data[2:end])
+        println("Payload: ", payload)
+
+        # while deltas[1] != 0 || deltas[2] != 0
+        #     step = Int16[0, 0]
+        #     for i in 1:2
+        #         if deltas[i] > 0
+        #             actual_step = min(1000, deltas[i])
+        #             deltas[i] -= actual_step
+        #             step[i] = actual_step
+        #         elseif deltas[i] < 0
+        #             actual_step = min(1000, -deltas[i])
+        #             deltas[i] += actual_step
+        #             step[i] = -actual_step
+        #         end
+        #     end
+        # end 
+    end
+end
+
+server = WebSockets.listen("0.0.0.0", 8080) do socket
+    println("Client connected")
+    for data in socket
+        println("Received data: ", data)
+
+        process_message(data)
+
+        send(socket, data)
+    end
+end
+
+close(server)
 ```
