@@ -1844,65 +1844,67 @@ https://discord.com/channels/1154647250144870412/1214522805123682314/12496419770
 ```julia
 using HTTP.WebSockets
 
+@enum MessageType begin
+    HEARTBEAT
+    TARGET_DELTAS
+end
+
 const MESSAGE_TAGS = Dict(
-    "HEARTBEAT" => 0x00,
-    "TARGET_DELTAS" => 0x01,
+    HEARTBEAT => 0x00,
+    TARGET_DELTAS => 0x01,
 )
 
-function generate_message(tag::UInt8, payload::Vector{UInt8})
-    pushfirst!(payload, tag)
+function generate_message(type::MessageType, payload::Vector{UInt8})
+    if !haskey(MESSAGE_TAGS, type)
+        println("Invalid message type: ", type)
+        return nothing
+    end
+
+    pushfirst!(payload, MESSAGE_TAGS[type])
     println("Generated message: ", payload)
     return payload
 end
 
-function parse_message_tag(tag::UInt8)
+function parse_message_type(tag::UInt8)::Union{MessageType, Nothing}
     for (key, value) in MESSAGE_TAGS
         if tag == value
             return key
         end
     end
-    return "INVALID"
+    return nothing
 end
 
 function process_message(data::Any)
-    println("Non-Uint8[] data received: ", data)
+    println("Non-UInt8[] data received: ", data)
+    return nothing
 end
 
 function process_message(data::Vector{UInt8})
     message_tag = data[1]
-    message_type = parse_message_tag(message_tag)
+    message_type = parse_message_type(message_tag)
 
-    println("Received message: ", message_type)
+    if isnothing(message_type)
+        println("Received invalid message tag: ", message_tag)
+        return nothing
+    else
+        println("Received message: ", message_type)
+    end
 
     # Parse message data
-    if message_type == "HEARTBEAT"
-        return generate_message(MESSAGE_TAGS["HEARTBEAT"], UInt8[])
+    if message_type == HEARTBEAT
+        return generate_message(HEARTBEAT, UInt8[])
 
-    if message_type == "TARGET_DELTAS"
+    elseif message_type == TARGET_DELTAS
         payload = reinterpret(Int16, data[2:end])
         println("Payload: ", payload)
+        return generate_message(TARGET_DELTAS, reinterpret(UInt8, payload))
 
-        return generate_message(MESSAGE_TAGS["TARGET_DELTAS"], reinterpret(UInt8, payload))
-
-        # while deltas[1] != 0 || deltas[2] != 0
-        #     step = Int16[0, 0]
-        #     for i in 1:2
-        #         if deltas[i] > 0
-        #             actual_step = min(1000, deltas[i])
-        #             deltas[i] -= actual_step
-        #             step[i] = actual_step
-        #         elseif deltas[i] < 0
-        #             actual_step = min(1000, -deltas[i])
-        #             deltas[i] += actual_step
-        #             step[i] = -actual_step
-        #         end
-        #     end
-        # end 
     end
 end
 
-server = WebSockets.listen("0.0.0.0", 8080) do socket
+WebSockets.listen("0.0.0.0", 8080) do socket
     println("Client connected")
+
     for data in socket
         println("Received data: ", data)
 
@@ -1910,10 +1912,9 @@ server = WebSockets.listen("0.0.0.0", 8080) do socket
         println("Response: ", response)
 
         if !isnothing(response)
-            send(socket, response)
+            WebSockets.send(socket, response)
         end
     end
-end
 
-close(server)
+end
 ```
