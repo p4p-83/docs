@@ -1922,7 +1922,6 @@ function process_message(socket::WebSocket, data::AbstractArray{UInt8})
 
             println("Stepped: ", step)
             send_message(socket, MOVED_DELTAS, reinterpret(UInt8, step))
-            sleep(0.4)
         end
 
     end
@@ -1940,3 +1939,25 @@ WebSockets.listen("0.0.0.0", 8080) do socket
 
 end
 ```
+
+- FUCK. YES. THIS. IS. SO. COOL.
+https://discord.com/channels/1154647250144870412/1214522805123682314/1249711510901493822
+
+This probably(?) isn't logic that actually needs to exist in the final, but, it shows that the entire messaging link between the interface <-> server works, and has the capacity to do work.
+
+1. The user clicks on a point in the video bounding box
+2. The mouse event is captured
+3. The clicked pixel location is converted to a delta from (0,0), defined as the middle of the screen
+4. The delta is normalised into an `Int16` range
+5. That delta is messaged to the server as `TARGET_DELTAS`
+6. The server receives the message
+7. The server parses the message tag to identify it as a `TARGET_DELTAS` message
+8. The server uses that knowledge to parse the payload
+9. The server steps in maximum increments of 1000 `Int16` coordinate space points until the delta away from (0,0) is zero
+10. While stepping, the server messages the interface with the amount of steps taken as `MOVED_DELTAS`
+11. The interface receives the messages
+12. The interface parses the message tag...
+13. The interface parses the payload...
+14. The interface denormalises the deltas from the `Int16` range to the real viewport size
+15. The interface moves the target circle the according number of moved steps
+
