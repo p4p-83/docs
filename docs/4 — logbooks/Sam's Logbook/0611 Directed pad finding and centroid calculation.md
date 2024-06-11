@@ -1,6 +1,6 @@
 Sort of based on what I believe to be happening under the hood with the Felzenszwalb algorithm trailed in [0606 ImageSegmentation.jl test](0606%20ImageSegmentation.jl%20test.md). This is an algorithm to first search for a pad in a directed manner, and then find the centroid of that pad.
 
-The pad finding part of the algorithm is pretty crude in this demo. Ideally you'd search a sector based on the cardinal direction as input by the user, eg with `W`, `A`, `S`, and `D` keys. This would find the nearest pad in, say, the upward direction (for a `W`) by searching arcs from 45° to 135° (polar coords, CCW of horizontal) of increasing radius. The demo however chooses a straight upward line of increasing "radius" because, well, it's only a demo.
+The pad finding part of the algorithm is pretty crude in this demo. Ideally you'd search a sector based on the cardinal direction as input by the user, eg with `W`, `A`, `S`, and `D` keys (see image at the end of this page). This would find the nearest pad in, say, the upward direction (for a `W`) by searching arcs from 45° to 135° (polar coords, CCW of horizontal) of increasing radius. The demo however chooses a straight upward line of increasing "radius" because, well, it's only a demo.
 
 The centroid finding method just performs a crude search of each neighbouring pixel, starting with the first "pad" pixel as found by the initial pad search. This method tries every possible place (an tries many of the places more than once) and sums up all coordinates of located pads.
 
@@ -132,3 +132,9 @@ write("anim.gif", frames)
 This all essentially used depth-first search. We can switch the `push!(search, …` statements to `pushfirst!(search, …`, giving us an alternative visualisation. The results are otherwise the same.
 
 ![](anim_bfs.gif)
+
+Here's a better pad finding algorithm that actually finds the pad that the user would expect:
+
+![](Page%201,%20object%205.jpg)
+
+(Note that the alternating search direction is not necessary — I just drew it that way to keep the line continuous to make the pattern clearer.)
