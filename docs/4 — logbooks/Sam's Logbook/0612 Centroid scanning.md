@@ -749,3 +749,7 @@ mask = makeMask()
 # display(centroids)
 Analyser.finalPreview(mask, centroids)
 ```
+
+Long story short, the first method gives 13 ms with BenchmarkTools, and the second gives 884 ms. Don't do it the second way!
+
+— Addendum: I suspect, from the insanely high memory allocation stats, that my algorithm is not doing quite what I thought, because the whole goal was to *avoid* too many reallocations.
