@@ -6,8 +6,6 @@ The takeaway from all of this is that quick and dirty algorithms in julia are no
 
 Writing this C algorithm has allowed me to confirm that the performance is favourable, and slightly surprisingly, the process is more enjoyable. The algorithm was far easier to write and the syntax cleaner in the C code.
 
-Let's look at the performance.
-
 First, here's the algorithm. Note that this is not the same as either julia algorithm, although it is resemblant of the first algorithm. Part of this is that I have got better at writing algorithms for this problem simply because I've done it twice already and seen which sorts of things work and which don't. The other part of this is that this is C code, and C is a different language to julia with a different workflow. This new approach fairly well gave up on idiomatic code and self-documentation and just did things as directly as possible and as strategically as possible. (I'm not just comparing julia and C here — I was also trying to prove to myself that real-time image processing with any sort of custom code was going to be feasible.)
 
 ![](Page%201,%20object%205-1.jpg)
@@ -70,6 +68,8 @@ centroids = main()
 I then wrote the following C code. (This gets compiled with `-O3` from within that julia wrapper above.)
 
 ```c
+// algorithm.c
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -91,7 +91,7 @@ inline Point point(int x, int y) {
 	return p;
 }
 
-int splatSearch(int width, int height, int (mat)[width][height], int startX, int startY, volatile Centroid *centroidsList, int centroidIndex) {
+int splatSearch(int width, int height, int (mat)[width][height], int startX, int startY, Centroid *centroidsList, int centroidIndex) {
 
 	#define pixelAt(x, y) (mat[(x)][(y)])
 
@@ -166,7 +166,7 @@ int splatSearch(int width, int height, int (mat)[width][height], int startX, int
 
 }
 
-int findPads(int width, int height, int (mat)[width][height], volatile Centroid *centroidsList) {
+int findPads(int width, int height, int (mat)[width][height], Centroid *centroidsList) {
 
 	// prepare for search
 	// we impose the condition that all edge pixels must be non-pad
@@ -216,3 +216,7 @@ I know what language I'll be choosing from now onwards for these types of tasks.
 Here's a picture of the output to prove that the code is actually doing its job (and isn't just fast because it's wrong).
 
 ![](plot_50.png)
+
+— Addendum: in future, I should consider changing the `Centroid.x` and `Centroid.y` values to be floats, not ints, if we go ahead with an algorithm of this nature. There's nothing forcing them to be integers (well, except the need to round to the nearest integer pixel when plotting maps like the above from julia, but it'd be better to have julia do the rounding for that specific task), and floats would retain a bit more accuracy.
+
+— Addendum: it seems that `-Ofast` does shave a few fractions of a microsecond off.
