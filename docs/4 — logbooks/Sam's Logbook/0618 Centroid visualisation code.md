@@ -202,7 +202,7 @@ end
 	footprintColour = RGB{N0f8}(0, 0.5, 0.25)
 	footprintc = map(c->PlottableCentroid(c, footprintColour), getFootprintCentroids())
 
-	footprintc2 = translate(footprintc, [0, 3])
+	footprint2c = translate(footprintc, [0, 3])
 
 	padColour = RGB{N0f8}(0.25, 0, 0.5)
 	padc = map(c->PlottableCentroid(c, padColour), getPadCentroids())
@@ -211,14 +211,20 @@ end
 	padc3 = rotate(padc2, [0, 0], 0.6π)
 
 	plotCentroids(footprintc, true)
-	plotCentroids(footprintc2, false)
+	plotCentroids(footprint2c, false)
 	plotCentroids(padc3, false)
 
-	# connectAll([footprintc; footprintc2; padc3])
-	connectBetween([footprintc; footprintc2], padc3)
+	# connectAll([footprintc; footprint2c; padc3])
+	connectBetween([footprintc; footprint2c], padc3)
 
 	global framebuf
 	save("connections.png", framebuf)
 
 end)()
 ```
+
+—
+
+Note that I did also try using PyPlots.jl, PlotlyJS.jl, and PGFPlots.jl to draw these as bubble plots. The first two were just too problematic as they don't scale the bubbles with the axes in a predictable manner. PGFPlots (in LaTeX) does, but PGFPlots.jl didn't expose any clear way to access this functionality. It proved easier to just draw raster graphics, at least for the time being.
+
+The eventual goal is to be able to animate the algorithm, which means that a raster (which is pretty quick to draw and is a compatible file format) is likely the best option anyway. The fallback may be to use [Manim](https://www.manim.community), but this seems a little overkill for my current purposes (and requires Python).
