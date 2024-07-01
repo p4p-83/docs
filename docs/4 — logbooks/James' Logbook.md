@@ -1932,6 +1932,7 @@ WebSockets.listen("0.0.0.0", 8080) do socket
     println("Client connected")
 
     for data in socket
+        println()
         println("Received data: ", data)
 
         process_message(socket, data)
@@ -1961,3 +1962,506 @@ This probably(?) isn't logic that actually needs to exist in the final, but, it 
 14. The interface denormalises the deltas from the `Int16` range to the real viewport size
 15. The interface moves the target circle the according number of moved steps
 
+- Jobs for tomorrow:
+	- Remove some of my useEffects if I can!
+	- Hide the overlay if the video errors...
+	- `setIsVideoStreaming?.()`
+	- `setVideoSize()`
+	- remove forwardRef
+
+## Tue 11 Jun
+
+- Wow, this diff is insane 😂
+- I'm glad that at least the diff goes bad -> good 😂
+
+```
+feat: :art: significantly improve `PlaceVideo` implementation
+
+- properly decouples `PlaceOverlay` from the `video` element
+- fixes overlay still showing if video errors
+- removes `forwardRef`
+- removes unnecessary `useState`
+- improves component lifecycle of `PlaceOverlay`
+- uses conditional rendering instead of `display: none`
+```
+
+### Catching up with Sam
+
+- Showing him the frontend / architecture / design / React
+- Talking about repeatability in setup, deployment, etc.
+- Talking about the state of the mechanics
+- Next steps
+
+#### Next steps
+
+- I can start working on the CV
+	- Just read Sam's logbook
+	- Can we make a paste mask?
+		- If yes, then our CV can be modular—we develop with the copper mask, knowing that the paste mask can be substituted in
+	- Does 'cleaning the data' have a technical meaning?
+	- What is 'useful' centroid information?
+		- Centres of pads =/= centres of leads, so not always
+
+- For open loop:
+	- Sending target locations to the frontend
+	- Calibration functions / logic
+
+- Keyboard input
+
+### Afterwards...
+
+- Small interface bug fixes and tweaks...
+- Fixing some lifecycle things/error handling for `PlaceVideo`
+
+- Deciding the italics on the home page...
+- Adding dynamic subitles...
+- Picking a font...
+- All mission critical 😭😂
+
+- Font shortlist:
+	- Ubuntu
+	- Maven Pro
+	- Encode Sans
+
+## Wed 12 Jun
+
+- More font selection apparently... I thought I settled on Encode Sans last night, but Ubuntu is speaking to me today
+
+## Thu 13 Jun
+
+- Talking to Jin about potential improvements
+
+- [x] Need to add keyboard input to overlay
+- [x] Use protobufs for messaging
+- [ ] Look at making the web interface a native Electron app
+	- Solves the issue of browser stability
+- [ ] Tauri go fast brrrt 🦀
+	- ⚡blazingly fast⚡
+
+- Adding a proper 'error' prompt if video fails to load
+
+## Fri 21 Jun
+
+- Refactoring `overlayTargetPosition` from client viewport offset to percentage offset
+- Can remove the logic to clear the target if the overlay is resized
+- Getting ready for a potential move to `<canvas>`!
+
+- Looking into protobufs
+
+## Sat 29 Jun
+
+- Looking at what Sam has dropped off for me
+- Nice! It looks solid
+- Lashing the Raspberry Pi to the top of the head plate
+- Re-wiring/re-connecting the modules
+- Mounting the CM3
+
+- Gantry seems fine—limit switches are all working
+- Will connect the motor driver back to the Raspberry Pi, and set up the WebSocket listener for open-loop
+
+- My other to-dos:
+	- Target locations -> frontend
+		- Canvas?
+	- Calibration functions/logic
+	- Settings page
+	- CV
+	- Protobufs
+	- Electron
+
+### Julia Server with Gantry Logic
+
+```julia
+using HTTP.WebSockets
+using LibSerialPort
+
+@enum MessageType begin
+    HEARTBEAT
+    TARGET_DELTAS
+    MOVED_DELTAS
+end
+
+const MESSAGE_TAGS = Dict(
+    HEARTBEAT => 0x00,
+    TARGET_DELTAS => 0x01,
+    MOVED_DELTAS => 0x02,
+)
+
+gantryPosition = [ 0 0 0 ]
+
+function send_message(socket::WebSocket, type::MessageType, payload::AbstractArray{UInt8})
+    if !haskey(MESSAGE_TAGS, type)
+        println("Invalid message type: ", type)
+        return
+    end
+
+    message = Vector{UInt8}(undef, length(payload) + 1)
+    message[1] = UInt8(MESSAGE_TAGS[type])
+    if length(payload) > 0
+        message[2:end] .= payload
+    end
+
+    println("Generated message: ", message)
+    WebSockets.send(socket, message)
+end
+
+function parse_message_type(tag::UInt8)::Union{MessageType, Nothing}
+    for (key, value) in MESSAGE_TAGS
+        if tag == value
+            return key
+        end
+    end
+    return nothing
+end
+
+function process_message(socket::WebSocket, data::Any)
+    println("Non-UInt8[] data received: ", data)
+    return nothing
+end
+
+function process_message(socket::WebSocket, data::AbstractArray{UInt8}, gantry::SerialPort)
+    message_tag = data[1]
+    message_type = parse_message_type(message_tag)
+
+    if isnothing(message_type)
+        println("Received invalid message tag: ", message_tag)
+        return nothing
+    else
+        println("Received message: ", message_type)
+    end
+
+    if message_type == HEARTBEAT
+        send_message(socket, HEARTBEAT, UInt8[])
+
+    elseif message_type == TARGET_DELTAS
+        payload = reinterpret(Int16, data[2:end])
+        println("Payload: ", payload)
+        
+        gantryPosition[1] = gantryPosition[1] + payload[1]
+        gantryPosition[2] = gantryPosition[2] + payload[2]
+        
+        write(gantry, "G0 X$(gantryPosition[1]) Y$(gantryPosition[2]) Z$(gantryPosition[3])\n");
+
+    end
+
+end
+
+##
+
+gantry = open("/dev/ttyUSB1", 115200)
+
+write(gantry, "G28\n")
+gantryPosition = [ 0 0 0 ]
+
+##
+
+WebSockets.listen("0.0.0.0", 8080) do socket
+    println("Client connected")
+
+    for data in socket
+        println()
+        println("Received data: ", data)
+
+        process_message(socket, data, gantry)
+    end
+
+end
+
+##
+
+close(gantry)
+
+```
+
+- Open loop!
+- https://discord.com/channels/1154647250144870412/1154647251193434165/1256537119090802688
+
+## Sun 30 Jun
+
+- Working on the protobufs now
+
+```julia
+using ProtoBuf
+protojl("pnp.proto", ".", ".")
+```
+
+> [!warning] Careful!
+> `ProtoBuf.jl` generates this:
+> ```julia
+> function PB.encode(e::PB.AbstractProtoEncoder, x::Message)
+>    initpos = position(e.io)
+>    x.tag != var"Message.MessageTags".HEARTBEAT && PB.encode(e, 1, x.tag)
+>    !isnothing(x.deltas) && PB.encode(e, 2, x.deltas)
+>    return position(e.io) - initpos
+> end
+> ```
+> 
+> The `x.tag != var"Message.MessageTags".HEARTBEAT` means that a plain heartbeat message will not be encoded; ie the buffer will not be touched; ie the encoding does not happen!
+> 
+> The guard must be removed, ie always encode the tag.
+
+EDIT: Hm, actually, see [Field Presence](https://arc.net/l/quote/lxfqapjg)
+- What if there are _no_ bytes in that case 🤔
+- Maybe have `INVALID` as the default?
+- Have done that, and added proper field checking logic
+
+### Julia Server with protobufs
+
+- See https://github.com/p4p-83/interface/tree/main/stream/socket.jl
+
+## `p4p-83/protobufs`
+
+- Moving the protobuf definitions into its own repository
+
+## Mon 1 Jul
+
+- Finished implementing the protobufs yesterday
+
+- I will start working on adding the ability to draw targets on the interface overlay
+
+- Oh... I should be using the `onClick`-type JSX prop, rather than adding a `useEffect()` and `addEventListener`...
+- I completely forgot 😅
+
+- https://github.com/p4p-83/protobufs/commit/9980369269588cae5884df8d3850981da55e6c4d
+- https://github.com/p4p-83/interface/commit/a30b7e653cee02283d8dee2f212212a9674f29a7
+- https://discord.com/channels/1154647250144870412/1154647251193434165/1257136479499587704
+- Whenever the server receives a heartbeat from the frontend (ie every 5 seconds), it now randomly generates target positions and sends it back—which the frontend is now able to display 😎
+- When the user clicks on the target, it acts as if the user has clicked bang on the middle of the target
+
+- I will now start looking into the Canvas API
+	- https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial
+	- https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Manipulating_video_using_canvas
+	- https://code.pieces.app/blog/draw-interactive-shapes-react-canvas-api
+	- https://joshondesign.com/p/books/canvasdeepdive/title.html
+
+- Nevermind.
+	- https://joshondesign.com/p/books/canvasdeepdive/chapter03.html#events
+	- This sounds like a PITA...
+	- I will see if this is made any easier by some libraries...
+		- Seems so. https://konvajs.org/docs/styling/Mouse_Cursor.html
+		- Ultimately, for the time being, the current implementation is more than enough.
+		- If, in due course, we find that we _do_ need to draw more advanced shapes and graphics, it might pay to look at migrating then—but, for the time being, I don't think it's wise.
+
+> [!quote]
+> Canvas doesn't define any new events. You can listen to the same mouse and touch events that you'd work with anywhere else. This is both good and bad.
+>
+> The Canvas just looks like a rectangular area of pixels to the rest of the browser. The browser doesn't know about any shapes you've drawn. If you drag your mouse cursor over the canvas then the browser will send you standard drag events to the canvas as a whole, not to anything within the canvas. This means that if you want to do special things like making buttons or a drawing tool you will have to do the event processing yourself by converting the raw mouse events that the browser gives you to your own data model.
+
+- I will now start working on jumping to the next best target with the keyboard
+
+- Have added Shift+direction to step the gantry a fixed amount in the specified direction (eg `"a"`) over the serial port
+- Now adding teleportation to targets
+	- _What_ is the nearest target?
+
+### Nearest Target
+    
+- My naïve implementation is to:
+    1. Filter for target positions that fall beyond the reference line
+    2. Sort for the nearest target in that subset
+- For example, if I am looking to the left, I will:
+    1. Filter for all target positions where `.x` is less than my current `.x`
+    2. Sort based on `.x` to find the _greatest_ one
+- This 'works', but the 'nearest' one found might be basically directly up—it is just slightly displaced leftwards too.
+- What algorithm do I want to use?
+- Perhaps some vector/Pythagoras, which takes into account the non-major axis component too?
+- Or perhaps include the angle in my sorting?
+- Put it in polar coordinates?
+
+- Working in my physical notebook
+
+![[Pasted image 20240701160921.png]]
+
+#### Hypotenuse
+
+$$
+\Delta x^2 + \Delta y^2
+$$
+
+```julia
+
+deltas = [
+    -4 1
+    -3 5
+    1 8
+    0 15
+    4 12
+]
+
+for point in eachrow(deltas)
+    result = sum(point .^ 2)
+    
+    println(result)
+end
+
+```
+
+```
+17
+34
+65
+225
+160
+```
+
+- This just finds the hypotenuse
+- (1) shouldn't be the best.
+
+#### Scaled? Hypotenuse
+
+$$
+2\Delta x^2 + \Delta y^2
+$$
+
+```julia
+
+deltas = [
+    -4 1
+    -3 5
+    1 8
+    0 15
+    4 12    
+]
+
+for point in eachrow(deltas)
+    result = (2 * point[1] ^ 2) + (point[2] ^ 2)
+    
+    println(result)
+end
+
+```
+
+```
+33
+43
+66
+226
+176
+```
+
+- The scaling factor is kinda arbitrary, and doesn't do a whole lot (linear)...
+
+#### Exponential Runaway on Non-Major Axis
+
+$$
+\Delta x + \Delta y^2
+$$
+
+```julia
+
+deltas = [
+    -4 1
+    -3 5
+    1 8
+    0 15
+    4 12    
+]
+
+for point in eachrow(deltas)
+    result = (point[1] ^ 2) + point[2]
+    
+    println(result)
+end
+
+```
+
+```
+17
+14
+9
+15
+28
+```
+
+- Seems promising!
+- Also somewhat makes sense, has an inverse exponential relationship with how far it deviates from the desired axis.
+- Would be difficult to get it to work nicely if I choose to add (`Q`,`E`,`Z`,`C`) inputs to move diagonally though... no direct relationship with angle
+  - I guess this just means you would take the raw hypotenuse...?
+
+#### Polar Coordinates
+
+$$
+r * ((\theta - 0^{\circ})^2 + 1)
+$$
+
+```julia
+
+deltas = [
+    -4 1
+    -3 5
+    1 8
+    0 15
+    4 12    
+]
+
+for point in eachrow(deltas)
+    r = sqrt(sum(point .^ 2))
+    theta = -atan(point[1] / point[2])
+    
+    angle = 0
+    
+    thetaFactor = ((theta - angle)^2 + 1)
+    result = r * thetaFactor
+    
+    println("$result \t $r \t $theta \t $thetaFactor")
+end
+
+```
+
+```
+11.37
+7.53
+8.17
+15.0
+13.96
+
+```
+
+- When working with axes aligned with $90^{\circ}$, this means that the maximum angle that a point may have is $90^\circ = \pi/2 = 1.57$
+- ie a point that is maximally misaligned will have its radius multiplied by $1.57^2 + 1 = 3.46$
+- This feels reasonable
+
+---
+
+- I will implement the latter two and see how they behave
+
+- Gah! The fractions squaring giving smaller numbers 😑
+
+```julia
+function exponential_runaway(deltas)
+    return (deltas[1] ^ 2) + deltas[2]
+end
+
+function polar(deltas)
+    r = sqrt(sum(deltas .^ 2))
+    theta = -atan(deltas[2] / deltas[1])
+    
+    angle = 270
+    
+    thetaFactor = ((theta - angle)^2 + 1)
+    return r * thetaFactor
+end
+
+points = [
+    0.5512626840619517 0.558434424353399;
+    0.30038910505836575 0.5775082017242694;
+    0.4457770656900893 0.7488212405584802;
+]
+
+# ! Important!
+points = points .* 100
+
+deltas = [
+    [points[2,:] .- points[1,:]]
+    [points[3,:] .- points[1,:]]
+]
+
+println("---")
+
+for delta in deltas
+    println()
+    println(delta)
+
+    println("Exp Runaway: $(exponential_runaway(delta))")
+    println("Polar: $(polar(delta))")
+end
+
+```
