@@ -2465,3 +2465,18 @@ for delta in deltas
 end
 
 ```
+
+---
+
+- Sam has clearly already thought about this: [[0611 Directed pad finding and centroid calculation]] (I did know this at one point...)
+- And with far more logical reasoning.
+- I think we've sort of arrived at the same thing, though?
+
+- Ideally, the target positions would be provided by the Raspberry Pi in an ordered manner.
+	- In theory, the CV would have already ran some algorithm to detect the pads, through which it probably already has some metric of distance.
+	- On second thought. how would it know which order to put it into, for the user's unknown input?
+	- Perhaps have a `Map`, where there are multiple arrays that are ordered under a direction key?
+
+- I'm still not sure _where_ this logic would be running. I seem to be charging ahead under the assumption that this will be in the frontend interface—the target positions are passed along, the frontend draws nice clickable targets, and the frontend consumes keypresses to find the best target position and sends that over the wire as a `TARGET_DELTAS` message. From memory, I recall the initial discussions being that the frontend would instead pass the raw keycode (or maybe an abstracted direction) to the controller, which would then presumably search for the best target. I suspect this is the understanding that Sam has—should probably clear it up. I'd personally be partial to keeping this frontend implementation—there's more flexibility & power imo...
+
+- Perhaps I should think about how to implement his sweeping search—it may be possible to do that without a full linear search—or maybe I just call it done 😀
