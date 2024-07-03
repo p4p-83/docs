@@ -2750,7 +2750,9 @@ end
 plot!(size=(1250, 1250))
 ```
 
-- Shifting the angle deviation factor by $0.5$, and limiting the total impact to $1$ (because I only have 75 elements in the gradient array. The interface doesn't have the same limit, as JavaScript's sort function just compares two numbers—but.), I see that I have definitely changed the behaviour.
+![[Capture 2024-07-04 at 01.54.24.png]]
+
+- Shifting the angle deviation factor by $0.5$, and limiting the total impact to $1$ (because I only have finite elements in the gradient array; I can't just index it to infinity. The interface doesn't have the same limit, as JavaScript's sort function just compares numbers—but.), I see that I have definitely changed the behaviour.
 	- I do suspect that this is because of the hard cap (causing a 'saturation' though, and not because of the linear shift.)
 
 ```julia
@@ -2813,6 +2815,7 @@ end
 plot!(size=(1250, 1250))
 ```
 
+- Increasing the length of the gradient array wrt the maximum radius scaling factor so that I can pretend like I can index it 'infinitely'.
 - Hey! This is bloody great!
 
 **damping = 0**
@@ -2831,7 +2834,7 @@ plot!(size=(1250, 1250))
 
 #### Interface Testing
 
-- Testing these on the interface, a value ~2 really does feel more natural.
+- Testing these on the interface, a value 0.2 < damping < ~8 really does feel more natural.
 
 ```ts
   const [targetPositionOffsets, setTargetPositionOffsets] = useState<Position[] | null>([
