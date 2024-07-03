@@ -2031,14 +2031,15 @@ feat: :art: significantly improve `PlaceVideo` implementation
 
 - Talking to Jin about potential improvements
 
-- [x] Need to add keyboard input to overlay
-- [x] Use protobufs for messaging
-- [ ] Look at making the web interface a native Electron app
-	- Solves the issue of browser stability
-- [ ] Tauri go fast brrrt 🦀
-	- ⚡blazingly fast⚡
-
-- Adding a proper 'error' prompt if video fails to load
+> [!TODO]
+> - [x] Need to add keyboard input to overlay
+> - [x] Use protobufs for messaging
+> - [ ] Look at making the web interface a native Electron app
+> 	- Solves the issue of browser stability
+> - [ ] Tauri go fast brrrt 🦀
+> 	- ⚡blazingly fast⚡
+> 
+> - Adding a proper 'error' prompt if video fails to load
 
 ## Fri 21 Jun
 
@@ -2059,14 +2060,15 @@ feat: :art: significantly improve `PlaceVideo` implementation
 - Gantry seems fine—limit switches are all working
 - Will connect the motor driver back to the Raspberry Pi, and set up the WebSocket listener for open-loop
 
-- My other to-dos:
-	- Target locations -> frontend
-		- Canvas?
-	- Calibration functions/logic
-	- Settings page
-	- CV
-	- Protobufs
-	- Electron
+> [!TODO]
+> - My other to-dos:
+> 	- Target locations -> frontend
+> 		- Canvas?
+> 	- Calibration functions/logic
+> 	- Settings page
+> 	- CV
+> 	- Protobufs
+> 	- Electron
 
 ### Julia Server with Gantry Logic
 
@@ -2489,27 +2491,28 @@ end
 
 ### For Tomorrow
 
-- Start collecting inspiration for HUDs
-	- Video games
-	- Neovim
-	- Vehicles
-	- AR
-	- CleanShot
-	- iOSS
-	- Miro
-
-- Gantry protobufs
-- Gantry FW
-	- Old
-		- Incremental mode?
-	- New
-		- Is this actively being worked on?
-		- Should I go ahead and finish it?
-- Controller in Cpp (and media server)
-
-- Nearest target visualisation
-
-- Open loop testing
+> [!TODO]
+> - Start collecting inspiration for HUDs
+> 	- Video games
+> 	- Neovim
+> 	- Vehicles
+> 	- AR
+> 	- CleanShot
+> 	- iOSS
+> 	- Miro
+> 
+> - Gantry protobufs
+> - Gantry FW
+> 	- Old
+> 		- Incremental mode?
+> 	- New
+> 		- Is this actively being worked on?
+> 		- Should I go ahead and finish it?
+> - Controller in Cpp (and media server)
+> 
+> - Nearest target visualisation
+> 
+> - Open loop testing
 
 ## Tue 2 Jul
 
@@ -2607,8 +2610,8 @@ sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
 
 # Create the polar plot data
 r_max = 1  # Maximum radius
-num_r_points = 75  # Number of points along each ray
-num_θ_points = 200  # Number of points along each sector arc
+num_r_points = 150  # Number of points along each ray
+num_θ_points = 750  # Number of points along each sector arc
 
 # Arrays to hold polar coordinates and colors
 r = range(0, stop=r_max, length=num_r_points)
@@ -2633,16 +2636,16 @@ for i in 1:num_sectors
     θ_mean = mean(θ_sector)
     θ_range = 2π/num_sectors
     println("Middle: $θ_mean, Range: $θ_range")
-    for θ_val in θ_sector
-        θ_deviation = abs(θ_mean - θ_val)
+    # for θ_val in θ_sector
+        θ_deviation = abs.(θ_mean .- θ_sector)
         pct_deviation = θ_deviation / (θ_range / 2)
         println("Deviation: $θ_deviation, $pct_deviation")
 
         for j in 1:num_r_points
-            index = trunc(Int, (pct_deviation) * j) + 1
-            scatter!([θ_val], [r[j]], markercolor=gradients[i][index], markersize=6, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
+            index = trunc.(Int, (pct_deviation) * j) .+ 1
+            scatter!(θ_sector, [r[j]], markercolor=gradients[i][index], markersize=3, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
         end
-    end
+    # end
 
 end
 
@@ -2656,4 +2659,15 @@ plot!(size=(1250, 1250))
 ![[Capture 2024-07-03 at 16.08.08.png]]
 
 - This looks reasonable! I will implement it for now, and maybe keep it as a 'strategy' that we can switch out later
-- 
+
+- Some useful discussion for the report + user A/B testing: https://discord.com/channels/1154647250144870412/1154647251193434165/1257912613615046668
+
+> [!TODO]
+> Perhaps a dumb idea but you could implement a modifier key that rotates everything 45°. So the image just spins a bit temporarily and now W is more NE than N 😂
+> 
+> Also from my lit review I'm still wondering if we should break the image into tiles. Or have a modifier key that will basically long jump in a given direction so you don't have to hit all the intermediate pads
+
+> [!TODO]
+> Test the gantry without the selection with WASD—how does that feel?
+> 
+> 0 = last position on the board, and 1, 2, 3, 4, etc used to jump to parts bins
