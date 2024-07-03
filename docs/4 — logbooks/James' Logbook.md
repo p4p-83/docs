@@ -2480,3 +2480,180 @@ end
 - I'm still not sure _where_ this logic would be running. I seem to be charging ahead under the assumption that this will be in the frontend interface—the target positions are passed along, the frontend draws nice clickable targets, and the frontend consumes keypresses to find the best target position and sends that over the wire as a `TARGET_DELTAS` message. From memory, I recall the initial discussions being that the frontend would instead pass the raw keycode (or maybe an abstracted direction) to the controller, which would then presumably search for the best target. I suspect this is the understanding that Sam has—should probably clear it up. I'd personally be partial to keeping this frontend implementation—there's more flexibility & power imo...
 
 - Perhaps I should think about how to implement his sweeping search—it may be possible to do that without a full linear search—or maybe I just call it done 😀
+
+- Talking to Sam, I realise
+> > Perhaps I should think about how to implement his sweeping search—it may be possible to do that without a full linear search—or maybe I just call it done 😀
+> Yeah, this is a good point. I think you already answered this above (polar coords space with origin at camera centre, filter by angle within a 90° range, pick shortest radius) but if you've got something working we should stick with that for now
+
+- That is such a better idea than my faffing about with these exponential terms 😂
+
+### For Tomorrow
+
+- Start collecting inspiration for HUDs
+	- Video games
+	- Neovim
+	- Vehicles
+	- AR
+	- CleanShot
+	- iOSS
+	- Miro
+
+- Gantry protobufs
+- Gantry FW
+	- Old
+		- Incremental mode?
+	- New
+		- Is this actively being worked on?
+		- Should I go ahead and finish it?
+- Controller in Cpp (and media server)
+
+- Nearest target visualisation
+
+- Open loop testing
+
+## Tue 2 Jul
+
+- Giving a demo to Nitish
+- Updating the Julia server to work with the gantry, in a better manner (ie using protobufs, better code quality with a `Position` `struct` etc)
+
+- Improving fixed-step implementation (Shift+direction) by having the frontend determine the fixed step size and just sending it as `TARGET_DELTAS`
+	- Interface controls the step size
+	- Reduces duplication of logic
+	- The frontend+server already have the logic to track the moved delta (ie the controller can keep track of the updated position), whereas the previous `STEP_GANTRY` implementation just sent an `"a"` step which was entirely dependent on the hard-coded step size in the firmware—ie the controller has no idea how much the gantry actually moved
+
+- Taking the gantry home
+
+## Wed 3 Jul
+
+- Updating mediamtx on the Pi
+- Increasing the mediamtx write buffer
+  - This should hopefully help with the frame corruptions/freezing!
+
+### Nearest target visualisation
+
+I'm going to continue toying with the idea of placing some additional weighting wrt angle deviation when determining the nearest target.
+
+It hasn't felt quite right that the 'nearest target' is chosen to be the target up at an angle of 43deg just because it beats out something straight to the right by a tiny bit on its radius—I have suspicion that we'd want to prioritise things aligned with the cardinal directions to take less 'steps' in the standard case.
+
+This would obviously be something to properly A/B test at some point if we get around to that (ethics...?), or it'll just be an 'the engineer thought so'.
+
+#### Nearest Radius
+
+```julia
+using Plots
+using Colors
+
+# Define the number of sectors and the angle for each sector
+num_sectors = 4
+θ_start = -π / num_sectors
+θ_stop = 2π - π/num_sectors
+
+sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
+
+# Create the polar plot data
+r_max = 1  # Maximum radius
+num_r_points = 150  # Number of points along each ray
+num_θ_points = 750  # Number of points along each sector arc
+
+# Arrays to hold polar coordinates and colors
+r = range(0, stop=r_max, length=num_r_points)
+θ = range(θ_start, stop=θ_stop, length=num_θ_points)
+
+# Create a gradient for each sector
+gradients = [
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=num_r_points),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=num_r_points),
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=num_r_points),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=num_r_points),
+    range(RGB(0, 0, 1), stop=RGB(1, 0, 1), length=num_r_points),
+    range(RGB(1, 0, 1), stop=RGB(0, 0, 0), length=num_r_points),
+    range(RGB(0.0, 0.0, 0.0), stop=RGB(0.3, 0.6, 0.9), length=num_r_points),
+]
+
+# Plot each sector with a different gradient
+plot()
+for i in 1:num_sectors
+    θ_sector = θ[(θ .>= sector_limits[i]) .& (θ .< sector_limits[i + 1])]
+
+    for j in 1:num_r_points
+        scatter!(θ_sector, [r[j]], markercolor=gradients[i][j], markersize=3, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
+    end
+
+end
+
+# Display the plot
+plot!(size=(1250, 1250))
+```
+
+![[Capture 2024-07-03 at 14.43.20.png]]
+
+![[Capture 2024-07-03 at 15.19.29.png]]
+
+![[Capture 2024-07-03 at 15.29.50.png]]
+
+#### Nearest Radius with Angle Relationship
+
+```julia
+using Plots
+using Colors
+using Statistics
+
+# Define the number of sectors and the angle for each sector
+num_sectors = 4
+θ_start = -π / num_sectors
+θ_stop = 2π - π/num_sectors
+
+sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
+
+# Create the polar plot data
+r_max = 1  # Maximum radius
+num_r_points = 75  # Number of points along each ray
+num_θ_points = 200  # Number of points along each sector arc
+
+# Arrays to hold polar coordinates and colors
+r = range(0, stop=r_max, length=num_r_points)
+θ = range(θ_start, stop=θ_stop, length=num_θ_points)
+
+# Create a gradient for each sector
+gradients = [
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=num_r_points),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=num_r_points),
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=num_r_points),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=num_r_points),
+    range(RGB(0, 0, 1), stop=RGB(1, 0, 1), length=num_r_points),
+    range(RGB(1, 0, 1), stop=RGB(0, 0, 0), length=num_r_points),
+    range(RGB(0.0, 0.0, 0.0), stop=RGB(0.3, 0.6, 0.9), length=num_r_points),
+]
+
+# Plot each sector with a different gradient
+plot()
+for i in 1:num_sectors
+    θ_sector = θ[(θ .>= sector_limits[i]) .& (θ .< sector_limits[i + 1])]
+
+    θ_mean = mean(θ_sector)
+    θ_range = 2π/num_sectors
+    println("Middle: $θ_mean, Range: $θ_range")
+    for θ_val in θ_sector
+        θ_deviation = abs(θ_mean - θ_val)
+        pct_deviation = θ_deviation / (θ_range / 2)
+        println("Deviation: $θ_deviation, $pct_deviation")
+
+        for j in 1:num_r_points
+            index = trunc(Int, (pct_deviation) * j) + 1
+            scatter!([θ_val], [r[j]], markercolor=gradients[i][index], markersize=6, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
+        end
+    end
+
+end
+
+# Display the plot
+plot!(size=(1250, 1250))
+```
+
+- Testing different relationships on Desmos
+	- https://www.desmos.com/calculator/ece9m9uww6
+
+![[Capture 2024-07-03 at 16.08.08.png]]
+
+- This looks reasonable! I will implement it for now, and maybe keep it as a 'strategy' that we can switch out later
+- 
