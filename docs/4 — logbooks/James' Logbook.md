@@ -2671,3 +2671,320 @@ plot!(size=(1250, 1250))
 > Test the gantry without the selection with WASD—how does that feel?
 > 
 > 0 = last position on the board, and 1, 2, 3, 4, etc used to jump to parts bins
+
+---
+
+- Hm, implementing it in the interface, it doesn't feel right.
+- It seems to be preferring _really_ far points, as long as it lies basically on the search angle.
+- This somewhat makes sense, as the radius is being multiplied by a tiny number.
+
+- This isn't good!
+- Do I want to ensure the radius scaling factor is capped at some value that it will never go below?
+
+- Refactoring the Julia visualisation code to use matrix operations
+- It is comically faster 😂
+- It's now < 1 second for 150 radius points and 750 angle rays. Previously, it was almost a whole minute for 15 radius points and 200 rays. Yikes.
+
+![[Capture 2024-07-03 at 23.59.00.png]]
+
+- Well, I can now see that it clearly far-prefers the 'aligned' angles.
+
+- This wasn't quite the chevron I wanted, and that I thought I was seeing in the original screenshot (ie with fewer points).
+
+- I'll see if I can get this closer to what I intended...
+
+```julia
+using Plots
+using Colors
+using Statistics
+
+# Define the number of sectors and the angle for each sector
+num_sectors = 4
+θ_start = -π / num_sectors
+θ_stop = 2π - π/num_sectors
+
+sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
+
+# Create the polar plot data
+r_max = 1  # Maximum radius
+num_r_points = 150  # Number of points along each ray
+num_θ_points = 750  # Number of points along each sector arc
+
+# Arrays to hold polar coordinates and colors
+r = range(0, stop=r_max, length=num_r_points)
+θ = range(θ_start, stop=θ_stop, length=num_θ_points)
+
+# Create a gradient for each sector
+gradients = [
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=num_r_points),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=num_r_points),
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=num_r_points),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=num_r_points),
+    range(RGB(0, 0, 1), stop=RGB(1, 0, 1), length=num_r_points),
+    range(RGB(1, 0, 1), stop=RGB(0, 0, 0), length=num_r_points),
+    range(RGB(0.0, 0.0, 0.0), stop=RGB(0.3, 0.6, 0.9), length=num_r_points),
+]
+
+# Plot each sector with a different gradient
+plot()
+for i in 1:num_sectors
+    θ_sector = θ[(θ .>= sector_limits[i]) .& (θ .< sector_limits[i + 1])]
+
+    θ_mean = mean(θ_sector)
+    θ_range = 2π/num_sectors
+    println("Middle: $θ_mean, Range: $θ_range")
+    # for θ_val in θ_sector
+        θ_deviation = abs.(θ_mean .- θ_sector)
+        pct_deviation = min.(θ_deviation / (θ_range / 2) .+ 0.5, 0.999)
+        println("Deviation: $θ_deviation, $pct_deviation")
+
+        for j in 1:num_r_points
+            index = trunc.(Int, (pct_deviation) * j) .+ 1
+            scatter!(θ_sector, [r[j]], markercolor=gradients[i][index], markersize=3, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
+        end
+    # end
+
+end
+
+# Display the plot
+plot!(size=(1250, 1250))
+```
+
+- Shifting the angle deviation factor by $0.5$, and limiting the total impact to $1$ (because I only have 75 elements in the gradient array. The interface doesn't have the same limit, as JavaScript's sort function just compares two numbers—but.), I see that I have definitely changed the behaviour.
+	- I do suspect that this is because of the hard cap (causing a 'saturation' though, and not because of the linear shift.)
+
+```julia
+using Plots
+using Colors
+using Statistics
+
+# Define the number of sectors and the angle for each sector
+num_sectors = 4
+θ_start = -π / num_sectors
+θ_stop = 2π - π/num_sectors
+
+sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
+
+# Create the polar plot data
+r_max = 1  # Maximum radius
+num_r_points = 150  # Number of points along each ray
+num_θ_points = 750  # Number of points along each sector arc
+
+# Arrays to hold polar coordinates and colors
+r = range(0, stop=r_max, length=num_r_points)
+θ = range(θ_start, stop=θ_stop, length=num_θ_points)
+
+# A damping factor. Influence of deviation from the search angle is inversely proportional to this value.
+damping = 1.5
+
+# Create a gradient for each sector
+gradients = [
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=trunc(Int, (1+damping)*num_r_points)),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=trunc(Int, (1+damping)*num_r_points)),
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=trunc(Int, (1+damping)*num_r_points)),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=trunc(Int, (1+damping)*num_r_points)),
+    range(RGB(0, 0, 1), stop=RGB(1, 0, 1), length=trunc(Int, (1+damping)*num_r_points)),
+    range(RGB(1, 0, 1), stop=RGB(0, 0, 0), length=trunc(Int, (1+damping)*num_r_points)),
+    range(RGB(0.0, 0.0, 0.0), stop=RGB(0.3, 0.6, 0.9), length=trunc(Int, (1+damping)*num_r_points)),
+]
+
+# Plot each sector with a different gradient
+plot()
+for i in 1:num_sectors
+    θ_sector = θ[(θ .>= sector_limits[i]) .& (θ .< sector_limits[i + 1])]
+
+    θ_mean = mean(θ_sector)
+    θ_range = 2π/num_sectors
+    println("Middle: $θ_mean, Range: $θ_range")
+    # for θ_val in θ_sector
+        θ_deviation = abs.(θ_mean .- θ_sector)
+        pct_deviation = θ_deviation / (θ_range / 2) .+ damping
+        println("Deviation: $θ_deviation \n\n $pct_deviation")
+
+        for j in 1:num_r_points
+            index = trunc.(Int, (pct_deviation) * j) .+ 1
+            scatter!(θ_sector, [r[j]], markercolor=gradients[i][index], markersize=3, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
+        end
+    # end
+
+end
+
+# Display the plot
+plot!(size=(1250, 1250))
+```
+
+- Hey! This is bloody great!
+
+**damping = 0**
+![[Capture 2024-07-04 at 01.14.28.png]]
+
+**damping = 1**
+![[Capture 2024-07-04 at 01.15.14.png]]
+
+**damping = 5**
+![[Capture 2024-07-04 at 01.15.48.png]]
+
+**damping = 100**
+- At a very big number, the influence becomes minimal—so it's as if the factor doesn't exist.
+- Can be seen as a damping factor in a sense.
+![[Capture 2024-07-04 at 01.16.56.png]]
+
+#### Interface Testing
+
+- Testing these on the interface, a value ~2 really does feel more natural.
+
+```ts
+  const [targetPositionOffsets, setTargetPositionOffsets] = useState<Position[] | null>([
+    {
+      'x': 0.09790188448920424,
+      'y': 0.9416189822232395,
+    },
+    {
+      'x': 0.24185549706263829,
+      'y': 0.9050278477149615,
+    },
+    {
+      'x': 0.8876020447089341,
+      'y': 0.8755168993667506,
+    },
+    {
+      'x': 0.7434653238727398,
+      'y': 0.4303349355306325,
+    },
+    {
+      'x': 0.1125810635538262,
+      'y': 0.5462272068360418,
+    },
+    {
+      'x': 0.15208667124437322,
+      'y': 0.37766079194323643,
+    },
+    {
+      'x': 0.5499656672007325,
+      'y': 0.5133745326924544,
+    },
+    {
+      'x': 0.925963225757229,
+      'y': 0.7672541390096895,
+    },
+    {
+      'x': 0.5512626840619517,
+      'y': 0.558434424353399,
+    },
+    {
+      'x': 0.4457770656900893,
+      'y': 0.7488212405584802,
+    },
+    {
+      'x': 0.9060502021820401,
+      'y': 0.03494316014343481,
+    },
+    {
+      'x': 0.7314259555962462,
+      'y': 0.05574120698863203,
+    },
+    {
+      'x': 0.5562523842221714,
+      'y': 0.3819943541618982,
+    },
+    {
+      'x': 0.30038910505836575,
+      'y': 0.5775082017242694,
+    },
+    {
+      'x': 0.4777904936293584,
+      'y': 0.43222705424582286,
+    },
+    {
+      'x': 0.30475318532082096,
+      'y': 0.2430304417486839,
+    },
+    {
+      'x': 0.1262073701075761,
+      'y': 0.24333562218661783,
+    },
+    {
+      'x': 0.12397955291065843,
+      'y': 0.3066453040360113,
+    },
+    {
+      'x': 0.7494621194781415,
+      'y': 0.028595407034409093,
+    },
+    {
+      'x': 0.7555809872587167,
+      'y': 0.5491416800183109,
+    },
+    {
+      'x': 0.8394750896467537,
+      'y': 0.684290836957351,
+    },
+    {
+      'x': 0.03205920500495918,
+      'y': 0.861326009002823,
+    },
+    {
+      'x': 0.8349889372091249,
+      'y': 0.7737087052719921,
+    },
+    {
+      'x': 0.5819943541618983,
+      'y': 0.4532539864194705,
+    },
+  ])
+```
+
+- Some test data for target locations
+
+##### With no influence
+
+- ie just nearest radius (or very large damping)
+
+![[Capture 2024-07-04 at 01.21.30 1.png]]
+
+- `a` goes to the first target on the left
+- While the human operator is likely to expect the next `d` to go to the target labelled (3), it instead goes to (2).
+- This doesn't feel natural.
+
+![[Capture 2024-07-04 at 01.26.37.png]]
+
+- Also goes from (2) to (3), rather than (2) to (4)—which feels unnatural.
+
+##### With undamped influence
+
+- ie straight radius * deviation factor
+
+![[Capture 2024-07-04 at 01.23.46.png]]
+
+- Skips straight from (2) to (3), without stopping at (4) or (5)—because (3) has such a low deviation error, so the radius is multiplied by a very small factor
+
+##### With damped influence (0.5)
+
+![[Capture 2024-07-04 at 01.25.04 1.png]]
+
+- Now goes to (3), instead of the higher (4)!
+- This is great!
+
+![[Capture 2024-07-04 at 01.27.34.png]]
+- Also correctly goes from (1) to (2), rather than from (1) to (3). Nice!
+
+##### With damped influence (2)
+
+![[Capture 2024-07-04 at 01.29.55.png]]
+
+- Going from (3) to the right, a damping of 2 will take it to (4). A damping of 0.5 will take it to (5) instead—which I would probably say is more natural.
+- There is a concern though—if (3) goes to (5), how would (4) get reached if those top-left targets were not there?
+	- You can't!
+	- Note: I _can_ get to it from the targets in the top right (going left), and I can get to it from (1) going up. However, if (1) were not there, (3) and the target to the upper-right of (1) would go back and forth between each other, causing (4) to be unreachable.
+	- We can probably assume that there will be enough pads that all pads are reachable in a real scenario, though.
+
+> [!WARNING]
+> The damping CANNOT be too small!
+> If the influence causes the 'nearest' target to jump too far into the distance and disregards something closer, you run the danger of not being able to get to a target.
+> This is not to say that this problem does not exist if the system is nearest-radius-only—that must still be proved—but I have proven (through discovery of a case that breaks) that this damped algorithm can fail.
+
+- We might even be able to expand the search arc with this—if targets that are very far off the search arc are 'attenuated' heavily, then it should only be useful in cases where the field is sparse.
+
+- I'll roll with a damping factor of 1.5 for now.
+
+![[Capture 2024-07-04 at 01.46.40.png]]
