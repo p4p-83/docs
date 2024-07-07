@@ -29,3 +29,5 @@ Right, enough walls of text. I'll leave it as an exercise to the reader to split
 Another addendum: here's where it's at presently. This should make the location of the secondary rail slightly clearer. Sorry about the not so wonderful colour scheme.
 
 ![[Screen Shot 2024-07-07 at 19.23.51.png]]The teal rod will be 8 mm Ø steel linear rail (nominally precision ground, but who knows what the supplier will really do) and the darker blue one is probably going to be 10 mm OD aluminium tube (the size depends on what the hardware store carries — I have yet to double check. And yes, I forgot to model the hollow cross section, but that will make zero difference for the 3D printing). The other two funky parts are to be 3D printed, probably out of PLA, or whatever I have on hand for prototyping.
+
+Might try a light interference fit to get the linear bearing and rail to stay in the purple part. That and/or I can try to pin the rail and use a set screw to lock into a groove on the bearing.
