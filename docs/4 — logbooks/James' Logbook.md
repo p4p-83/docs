@@ -2498,8 +2498,11 @@ end
 > 	- Vehicles
 > 	- AR
 > 	- CleanShot
-> 	- iOSS
+> 	- iOS
+> 	- YouTube / IINA
 > 	- Miro
+> 
+> 	- WASD sector guide lines!
 > 
 > - Gantry protobufs
 > - Gantry FW
@@ -2991,3 +2994,424 @@ plot!(size=(1250, 1250))
 - I'll roll with a damping factor of 1.5 for now.
 
 ![[Capture 2024-07-04 at 01.46.40.png]]
+
+## Thu 4 Jul
+
+- Talking to Sam about potential settings for the damping
+	- https://discord.com/channels/1154647250144870412/1154647251193434165/1258221907585531904
+	- Perhaps overlay the polar diagram (a representation of?)
+
+> [!TODO]
+> - Want to work on adding the guide lines
+> 	- Search for 'React HUD' and see how people do it... can I do it without Canvas?
+> 	- Calibration page
+> 	- Settings page
+> 		- Browser local storage?
+
+- First looking at `notion-assignment-import` though...
+
+- Welp. It's now 1am, and I didn't get around to any of this.
+- Tomorrow, I guess.
+
+## Fri 5 Jul
+
+### HUD
+
+- Researching code examples for heads up displays
+	- https://github.com/bronz3beard/react-hud
+	- Ooh, I like the `backdrop-blur-lg`
+
+- Yeah, I don't want to use Canvas.
+	- No text aliasing
+	- No 'element' awareness, have to just check if a click location overlaps with a pixel.
+	- https://docs.nanos.world/docs/getting-started/tutorials-and-examples/basic-hud-canvas
+	- Compare the above to https://docs.nanos.world/docs/getting-started/tutorials-and-examples/basic-hud-react
+
+- I will want icons/sprites for graphical elements
+
+### Settings
+
+- I'll first quickly switch to the settings page
+
+- Cool, finally learning how to do a React context (and link to `window.localStorage`)
+- `zod` for input validation again
+- Fixing `WebRtcVideo` error if the supplied host is unresolvable/unreachable
+
+- 'Quickly', he says.
+- Four and a half hours later: https://discord.com/channels/1154647250144870412/1154647251193434165/1258702487662366840
+
+### Navbar
+
+- Now adding a navbar
+
+![[Capture 2024-07-06 at 00.22.07.png]]
+
+- Nice 😎
+
+- Also added `Shift`-`(P|S|C|L)` navigation from the home screen to quickly go to `/place`/`/calibrate`/`/settings`/`/learn`
+
+### Learn Page
+
+- Quickly add a `/learn` page now that I have the template components
+
+![[Capture 2024-07-06 at 02.31.00.png]]
+
+- Sick!
+
+![[Capture 2024-07-06 at 02.31.10.png]]
+
+- Added a `globals.ts` file for global strings/page configurations/etc.
+- In theory, if we ever need to update a page path, personal website URL, etc., it will now be easy...
+
+## Sat 6 Jul
+
+> [!TODO]
+> - Today:
+> 	- Think more about the research direction. Revisit papers in Bookends.
+> 	- Look at adding cards/collapsibles to the 'Constituent Pages' section.
+> 	- Finish documenting all implemented features on `/learn`.
+> 	- Right-align page path on Card heading (if I do that).
+> 	- Gantry pouncing without space confirmation.
+> 
+### Serial Port Issues
+
+- Man, why does the `open("/dev/tty.usbserial-10", 115200)` keep failing so often with
+```
+OS error code 6: Device not configured
+ERROR: libserialport returned SP_ERR_FAIL - Host OS reported a failure.
+Stacktrace:
+ [1] error(s::String)
+   @ Base ./error.jl:35
+ [2] check(ret::LibSerialPort.Lib.SPReturn)
+   @ LibSerialPort.Lib ~/.julia/packages/LibSerialPort/i1kHh/src/wrap.jl:299
+ [3] sp_open(port::Ptr{LibSerialPort.Lib.SPPort}, mode::SPMode)
+   @ LibSerialPort.Lib ~/.julia/packages/LibSerialPort/i1kHh/src/wrap.jl:341
+ [4] open(portname::String, baudrate::Int64; mode::SPMode, ndatabits::Int64, parity::SPParity, nstopbits::Int64)
+   @ LibSerialPort ~/.julia/packages/LibSerialPort/i1kHh/src/LibSerialPort.jl:474
+ [5] open(portname::String, baudrate::Int64)
+   @ LibSerialPort ~/.julia/packages/LibSerialPort/i1kHh/src/LibSerialPort.jl:467
+ [6] top-level scope
+   @ REPL[3]:1
+```
+
+- I don't even know how I fixed it previously... I literally just keep resetting the board/unplugging the USB/restarting the REPL until it works...
+- I can't `screen` to it either... surely there is something that I'm doing wrong?
+- It claims its an OS error...
+
+	- It's _not_ just `scree -wipe`
+	- Nor flipping the USB adaptor
+	- Nor plugging my MacBook in
+	- Nor starting the gantry away from (0, 0)
+
+- Can I program it using PlatformIO?
+	- No... Device not configured????????
+	- Okay, unplugging it worked this time
+	- And now I can monitor it...
+	- Inch resting.
+	- And now everything works.
+
+- Hm... the camera feed is freezing still...
+
+### Pouncing
+
+- Yeah, at least until proper handshaking is implemented where the gantry notifies the server that it has reached the destination (at which point the frontend resets), it really isn't intuitive to automatically pounce whenever a target has been selected, without the use of a `Space` 'select' input.
+
+### Interface on Pi
+
+- Running the interface on the Raspberry Pi
+- Installing `nvm`
+```sh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+```
+
+- Wow, installing the packages is painful. I'm even on my home WiFi, so I don't think it's the network.
+
+- It's slightly tolerable with
+```
+npm install --prefer-offline --no-audit
+```
+but now my Next scripts don't work... `npm run start` complains that there isn't a valid build in `.next` even after running `npm run build` (which exits immediately), as does `npm run dev`... what gives?
+
+- People online suggest to try running `npm install next@latest`
+	- This is taking forever...
+
+### Interface
+
+- I want to try adding an accordion for the Constituent Pages section
+
+- Sick!!!
+
+![[Capture 2024-07-06 at 17.51.09.png]]
+![[Capture 2024-07-06 at 17.51.39.png]]
+
+- I really like the page path on the right... love it
+
+- Adding a border, drop shadow, and backdrop blur to the navbar
+![[Capture 2024-07-06 at 19.53.40.png]]
+![[Capture 2024-07-06 at 19.54.01.png]]
+![[Capture 2024-07-06 at 19.54.15.png]]
+
+- This looks so dang good 😍
+
+### Learn Page
+
+- Continuing to write documentation
+- Writing a lot of the system architecture
+- Starting the Place page
+
+- I'm going to bed 😂 at a 'sane' time... 12.37pm
+
+## Sun 7 Jul
+
+- Significantly improving mobile interface
+	- Making text way smaller to display at a suitable size
+	- Adding a mobile navigation menu
+	- Improving text tracking
+
+- This is cool, I can just go to `James-MacBook-Pro.local:3000`
+
+![[Pasted image 20240707142014.png]]
+
+![[Pasted image 20240707142025.png]]
+
+- Continuing to make ground on writing up the `/learn` content
+
+- Hm, could I proxy the `/place` URLs through a server action, such that they can be accessed anywhere that the interface can?
+	- I suppose, if the user has access to the interface, they'll have access to the endpoints directly...
+
+- Highlighting the page fragment when navigated to by hash
+	- https://github.com/vercel/next.js/discussions/49465
+
+## Mon 8 Jul
+
+- Adding instant key navigation tips to link cards
+![[Capture 2024-07-08 at 03.29.34.png]]
+
+- This is _so_ cool.
+https://discord.com/channels/1154647250144870412/1154647251193434165/1259582286253522985
+
+- I also guess I am very much not sleeping today... considering it's now 7 am.
+
+- Just lots of small interface things...
+- Adding a custom hook for `useKeyPresses`
+
+- Adding some `useCallback()`s
+> [!TODO]
+> - I want to look at where `useMemo()` would make sense, and other places for `useCallback()`
+> - Need to search for all function defs
+> - Look at dependency arrays
+> - Add exponential backoff to progress bar
+
+## Tue 9 Jul
+
+- Working on progress bar increment function
+	- https://prog21.dadgum.com/227.html
+	- https://www.desmos.com/calculator/yggantskdu
+
+![[Capture 2024-07-09 at 12.17.02.png]]
+
+- This looks reasonable...
+- Currently it's a linear increment of $0.5$, which progresses $55\%$ after 5.5 seconds
+- Instead use a $1/n$ relationship, which varies its speed over time
+
+- Tuning it a bit more
+- https://www.desmos.com/calculator/4pelacztnu
+
+- Updating screenshots and adding demo video
+- Adding captions to image carousels
+
+- Adding new `TypographyKeyInput`
+- Fixing accordion hashes
+
+> [!TODO]
+> - Huh, this is interesting
+> - https://github.com/djkepa/custom-react-hooks/blob/8d254ee7d2d74651dd7b4d50932c38b58544ee8b/packages/use-element-size/src/index.tsx
+
+## Wed 10 Jul
+
+- Addng a 'View a demo' button to the place error
+
+![[Capture 2024-07-10 at 17.39.30.png]]
+
+- Add more system architecture writeup
+
+- Ignore `useKeyPresses()` inside of input elements
+
+## Thu 11 Jul
+
+- Cleaning up `useState`s
+- Move growing progress bar to own component
+- Perf optimisation for `fragmentIdMap`
+
+- I've been doing a lot more than I've been documenting here...
+- It's now deployed on Vercel @ https://p4p.jamesnzl.xyz.
+- Although, this now means that the `http://rpi.local...` doesn't work anymore, as you can't serve an HTTP resource from an HTTPS page.
+- Bugger.
+- I'll look into how to set up an HTTPS proxy for the HTTP service?
+
+- Still need to document things from Discord, and document the nearest target algorithm.
+- But, it's also 1am, and I'm losing my mind 🙃
+
+## Fri 12 Jul
+
+> [!TODO]
+> Jobs for today:
+> - Add missing logbook entries
+> - Document Discord + Logbook
+> 	- Nearest target algorithm
+> 	- Future ideas
+> - HTTPS proxy
+> 
+> - Start the proper mid-year report
+
+- Trying https://raspberrypi.stackexchange.com/a/61801
+
+```sh
+# Install Apache
+sudo apt-get install apache2
+
+# Enable Apache2 Modules for Proxying & SSL
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2enmod ssl
+
+# Apply configurations
+sudo systemctl restart apache2
+
+# Create directory and SSL Cert
+sudo mkdir /etc/apache2/ssl/
+
+sudo openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/apache2/ssl/whep.key -out /etc/apache2/ssl/whep.crt
+
+# Fill in Distinguished Name
+Country Name (2 letter code) [AU]:NZ
+State or Province Name (full name) [Some-State]:Auckland
+Locality Name (eg, city) []:Auckland
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:p4p-83
+Organizational Unit Name (eg, section) []:controller
+Common Name (e.g. server FQDN or YOUR name) []:controller
+Email Address []:p4p@jamesnzl.xyz
+
+# Create VirtualHost file
+sudo vim /etc/apache2/sites-available/001-SecureWhep.conf
+```
+
+```xml
+<VirtualHost *:443>
+
+    ProxyRequests Off
+    SSLProxyEngine On
+
+	<Proxy *>
+		Require ip 192.168
+	</Proxy>
+
+    ProxyPass / http://localhost:8889/
+    # ProxyPassReverse / http://localhost:8889/
+
+    <Location /proxy/>
+        ProxyPassReverse /
+        Order deny,allow
+        Allow from all
+    </Location>
+
+    ServerAdmin webmaster@localhost
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    SSLEngine on
+
+    SSLCertificateFile /etc/apache2/ssl/whep.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/whep.key
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+        SSLOptions +StdEnvVars
+    </Directory>
+
+    BrowserMatch "MSIE [2-6]" \
+        nokeepalive ssl-unclean-shutdown \
+        downgrade-1.0 force-response-1.0
+    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+
+</VirtualHost>
+```
+
+---
+
+- Oh... wait... before I continue...
+```yml
+# Enable TLS/HTTPS on the WebRTC server.
+webrtcEncryption: no
+# Path to the server key.
+# This can be generated with:
+# openssl genrsa -out server.key 2048
+# openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
+webrtcServerKey: server.key
+# Path to the server certificate.
+webrtcServerCert: server.crt
+```
+
+- I'll try configuring these...
+- I ⌘F'd through the README and didn't find anything for this...
+
+```sh
+openssl genrsa -out server.key 2048
+openssl req -new -x509 -sha256 -key server.key -out server.crt -days 7300
+```
+
+- Cool, generated a key and changed from `no` to `yes`
+- Now the site is accessible through HTTPS, but
+
+![[Capture 2024-07-12 at 15.07.18.png]]
+(accessing the page from HTTP)
+
+![[Capture 2024-07-12 at 15.07.33.png]]
+(accessing the page from HTTPS)
+
+- This is because of my self-signed certificate.
+- I will try to get a certificate from LetsEncrypt
+
+- Need to install `certbot` through `snapd`
+```sh
+sudo apt update
+sudo apt install snapd
+sudo snap install core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo certbot certonly --standalone
+```
+
+- Hm, nevermind, this doesn't directly work—the cert is issued for a specific domain that must be accessible from the internet. This means that I can have a cert issued for something like `rpi.jamesnzl.xyz`, but, then the cert wouldn't work for `rpi.local`—and I cannot issue a cert for an IP address.
+
+![[Capture 2024-07-12 at 15.58.51.png]]
+
+- https://community.letsencrypt.org/t/https-for-local-network-only/135173/2
+- https://github.com/NginxProxyManager/nginx-proxy-manager/issues/599#issuecomment-694313126
+- https://community.letsencrypt.org/t/certificates-for-hosts-on-private-networks/174
+- https://community.letsencrypt.org/t/lets-encrypt-for-internal-only-web-management/158154
+- https://superuser.com/questions/1690739/ssl-certificates-for-local-web-applications
+
+- I'll first try finish the Apache forward proxy.
+
+---
+
+```sh
+# Enable the site
+sudo ln -s /etc/apache2/sites-available/001-SecureWhep.conf /etc/apache2/sites-enabled/001-SecureWhep.conf
+```
+
+- Ugh. This is accessible as `https://rpi.local/cm3`, but, has the same unsafe error...
+- I suppose they basically do the same thing, and the key is still self-signed...
+
+- Oh! Once you trust it... it seems it at least loads properly through the interface...
+- I suppose I could just add something that takes the user to the raw page for them to approve?
+
+- I'll just leave it for the time being—I'd require me to:
+	- Change the form defaults
+	- Change the WebSocket server
+	- Add the extra logic to check if the error is an untrusted certificate
+
+
