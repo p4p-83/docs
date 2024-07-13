@@ -2560,6 +2560,8 @@ sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
 r_max = 1  # Maximum radius
 num_r_points = 150  # Number of points along each ray
 num_θ_points = 750  # Number of points along each sector arc
+# num_r_points = 40   # Number of points along each ray
+# num_θ_points = 125  # Number of points along each sector arc
 
 # Arrays to hold polar coordinates and colors
 r = range(0, stop=r_max, length=num_r_points)
@@ -2588,7 +2590,8 @@ for i in 1:num_sectors
 end
 
 # Display the plot
-plot!(size=(1250, 1250))
+p = plot!(size=(1250, 1250), dpi=240, background_color=:transparent, foreground_color=:gray)
+savefig(p, "../interface/client/src/app/learn/static-images/targetPlotUnweighted.png")
 ```
 
 ![[Capture 2024-07-03 at 14.43.20.png]]
@@ -2653,7 +2656,8 @@ for i in 1:num_sectors
 end
 
 # Display the plot
-plot!(size=(1250, 1250))
+p = plot!(size=(1250, 1250), dpi=240, background_color=:transparent, foreground_color=:gray)
+savefig(p, "../interface/client/src/app/learn/static-images/targetPlotWeightedSimple.png")
 ```
 
 - Testing different relationships on Desmos
@@ -2780,7 +2784,7 @@ r = range(0, stop=r_max, length=num_r_points)
 θ = range(θ_start, stop=θ_stop, length=num_θ_points)
 
 # A damping factor. Influence of deviation from the search angle is inversely proportional to this value.
-damping = 1.5
+damping = 0
 
 # Create a gradient for each sector
 gradients = [
@@ -2815,7 +2819,8 @@ for i in 1:num_sectors
 end
 
 # Display the plot
-plot!(size=(1250, 1250))
+p = plot!(size=(1250, 1250), dpi=240, background_color=:transparent, foreground_color=:gray)
+savefig(p, "../interface/client/src/app/learn/static-images/targetPlotWeightedDamping0.png")
 ```
 
 - Increasing the length of the gradient array wrt the maximum radius scaling factor so that I can pretend like I can index it 'infinitely'.
@@ -3414,4 +3419,142 @@ sudo ln -s /etc/apache2/sites-available/001-SecureWhep.conf /etc/apache2/sites-e
 	- Change the WebSocket server
 	- Add the extra logic to check if the error is an untrusted certificate
 
+## Sat 13 Jul
 
+- Taking the gantry back in
+
+> [!TODO]
+> - KaTeX
+> 	- Radians
+> - `STATIC_IMAGES`
+> - 'Cost function'
+> 	- Expand into a sum of radius and angle
+
+- A big catch up meeting with Sam
+
+### Calibration
+
+- Print off a grid/checkerboard
+- Use the checkerboard to align
+
+### CV so far
+
+- Taking an image with shiny stuff all the way through to centroids
+- Only don't have paste
+
+### Major bits of work that aren't on /learn
+
+- Head design
+	- Camera + head nozzle 'superposition'
+	- Either swivel or go to a fixed camera at the origin—the human operator doesn't want to have to go to origin every time.
+
+- Repeatability testing
+
+- Everything else is on the website
+
+### Research Direction
+
+- How do you do real-time computer vision, for a human operator?
+	- Rotation is a negotiation between the operator and CV
+
+- It's (machine vision, for our project) not an _extra_ function added on, it _is_ the function
+
+- Position is user first
+	- If we can describe with a mathematical function, and the user can adjust this on-the-fly, 
+- Rotation is machine first
+- Optimisation is machine first
+
+Mathemtatical model is jsut those three cost functions
+- Evaluate for all points
+- Itentify the centroids
+- and 
+
+### Other To-Dos
+
+- Draw contour plots
+
+- Inverse directivity
+- Inverse the damping
+
+> [!TODO]
+> Multiplexing a single rotary encoder with a range of inputs
+> Directivity controlled by a `Slider`
+
+- Like Altium—adjustable grid sizes
+
+- Three layers
+	- Zoomed out to make large jumps
+		- Centre box shows curent feed
+		- Surrounded with a box on all sides with the key to press to go there
+	- Standard with CV pounces, mouse will click on the nearest target regardless of position (keys & mouse snap)
+	- Zoomed in for fine adjustments with the mouse
+
+- Ability to display the colour key video stream
+
+- Talk about the background with the Joystick
+
+### Directivity
+
+- The 'damping factor' I previously identified is better thought of as the reciprocal of 
+
+```julia
+using Plots
+using Colors
+using Statistics
+
+# Define the number of sectors and the angle for each sector
+num_sectors = 4
+θ_start = -π / num_sectors
+θ_stop = 2π - π/num_sectors
+
+sector_limits = range(θ_start, stop=θ_stop, length=num_sectors + 1)
+
+# Create the polar plot data
+r_max = 1  # Maximum radius
+num_r_points = 150  # Number of points along each ray
+num_θ_points = 750  # Number of points along each sector arc
+
+# Arrays to hold polar coordinates and colors
+r = range(0, stop=r_max, length=num_r_points)
+θ = range(θ_start, stop=θ_stop, length=num_θ_points)
+
+# The directivity constant.
+directivity = 1e-6
+filename = "../interface/client/src/app/learn/static-images/targetPlotWeightedNonLinear1u.png"
+
+# Create a gradient for each sector
+gradients = [
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+    range(RGB(1.0, 0.7, 0), stop=RGB(0.0, 0.7, 1), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+    range(RGB(0, 1.0, 0), stop=RGB(1, 0.7, 1), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+    range(RGB(0, 0, 1), stop=RGB(1, 0, 1), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+    range(RGB(1, 0, 1), stop=RGB(0, 0, 0), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+    range(RGB(0.0, 0.0, 0.0), stop=RGB(0.3, 0.6, 0.9), length=trunc(Int, (1+(1/directivity))*num_r_points)),
+]
+
+# Plot each sector with a different gradient
+plot()
+for i in 1:num_sectors
+
+    θ_sector = θ[(θ .>= sector_limits[i]) .& (θ .< sector_limits[i + 1])]
+
+    θ_search = mean(θ_sector)
+    θ_max_deviation = 2π/(2num_sectors)
+    println("Search: $θ_search, Range: $θ_max_deviation")
+
+    θ_deviation = abs.(θ_search .- θ_sector)
+    weighting = (θ_deviation / (θ_max_deviation)) .+ (1 / directivity)
+    println("Deviation: $θ_deviation \n\n $weighting")
+
+    for j in 1:num_r_points
+        index = trunc.(Int, (weighting) * j) .+ 1
+        scatter!(θ_sector, [r[j]], markercolor=gradients[i][index], markersize=3, markerstrokewidth=0, markershape=:diamond, leg=false, proj=:polar)
+    end
+
+end
+
+# Display the plot
+p = plot!(size=(1250, 1250), dpi=240, background_color=:transparent, foreground_color=:gray)
+savefig(p, filename)
+```
