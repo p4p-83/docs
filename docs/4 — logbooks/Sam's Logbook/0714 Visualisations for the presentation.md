@@ -21,7 +21,7 @@ These use the following terms.
 - $D$ is the directivity, describing the extent to which the search pattern has been smeared in a direction. This has the effect of drawing an isotropic search ($D=0$) into an ellipsoidal search (large $D$) and eventually into a line (infinite $D$).
 - $I$ is the "isolation", or the degree to which the search pattern is confined to the sector. Where adjusting $D$ squished a circle into an ellipse, adjusting $I$ eventually causes a complete wedge shape.
 - $\theta_s$ is the search direction. Given we're working at a keyboard with four direction keys, $\theta_s$ will be 0 rad for the `D` key, π/2 rad for the `W` key, π rad for the `A` key, etc.
-- $\theta_d$ is half of the nominal included angle of the search sector. This is π/4 radians, or 45°, for our case with four cardinal search directions. Essentially, this mean that pressing a key is going to look in a given direction but allowing ±45° either side of centre. Where $N$ is the number of cardinal directions (number of keys), $\theta_d = \frac{2\pi}{2N}$.
+- $\theta_d$ is half of the nominal included angle of the search sector. This is π/4 radians, or 45°, for our case with four cardinal search directions. Essentially, this means that pressing a key is going to look in a given direction but allowing ±45° either side of centre. Where $N$ is the number of cardinal directions (number of keys), $\theta_d = \frac{2\pi}{2N}$.
 
 This gives rise to the following cost function $c(\theta, r)$. We'll use this function to calculate the 'cost' of a given point. (The next jump target will be the lowest-cost point — this has already been documented by James.)
 
@@ -95,3 +95,9 @@ gif(anim, "directivity.gif", fps = 12)
 ```
 
 That's probably enough for now. I'll need to figure out exactly what's going in the slides and a few more details before refining this any further.
+
+---
+
+Turns out I couldn't resist. Here's a bit more of a visually simplified and clarified version. (The grey text is only temporary — the background is transparent so white or black would variously not show depending on if the user is viewing in light mode or dark mode. It does, however, look better in .mov form and with higher background contrast.)
+
+![](directivity%201.gif)
