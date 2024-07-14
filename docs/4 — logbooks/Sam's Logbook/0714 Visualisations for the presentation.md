@@ -9,6 +9,7 @@ I spent the better part of today testing out different functions that would prov
 - I tried a $\cos$ function for the polar pattern. I can scale the lobe either by raising to a power ($\cos^n(\theta)$) or by multiplying the angle ($\cos(D\theta)$). I prefer multiplying the angle, as this mimics the directivity behaviour best.
 - Unfortunately, plain old $\cos$ has too many lobes. I eventually realised that the hyperbolic version, $\cosh$, fixes this.
 - It's still possible to bleed into neighbouring sectors, and so I needed another term to "clip" all of the out-of-sector parts. The obvious option was a Heaviside unit step function with an absolute value, but I wanted something a bit more "organic". The Wikipedia page for the unit step function showed a few approximations using logistic curves and so forth, which could be done with $\tanh$ or an exponential. (This was where I got the hyperbolic trig function idea from that gave rise to the $\cosh$ above.) I preferred the exponential method, as the $\tanh$ ranged from -1 to 1, and dealing with this would have introduced a magic number factor of 2.
+- I squared the angular deviation, which had the same effect as taking an absolute value, but is also a little less discontinuous.
 
 Therefore, I came up with the following.
 
@@ -31,7 +32,7 @@ $$
 I also need a function to calculate the radius that would result in a particular cost value as a function of the angle, $r(\theta, c)$, which will allow me to plot a locus of constant cost in the visualisation I'm putting together. This can be found by rearranging the equation for cost.
 
 $$
- r(\theta, c) = c / w(\theta) / u(\theta) 
+ r(\theta, c) = \frac {c} { w(\theta) \cdot u(\theta) }
 $$
 
 At this point, I've got a cost function and a locus function that behave similarly in principle to James's piecewise ones, but without the piecewise-ness that I wanted to avoid. Let's plot them.
