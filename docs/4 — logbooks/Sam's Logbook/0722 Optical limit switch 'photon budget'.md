@@ -15,3 +15,7 @@ Note that I could actually low-pass filter the signal to remove the dc, which wi
 Noise will pose a bigger challenge, and the next step would be to take these figures and work out what kind of noise I can expect from the sunlight (which will remain even after filtration) and perhaps from the amplifiers. However, this will be using a lock-in detector, so as long as I haven't clipped the signal, I should be able to deal with the noise to a fair degree.
 
 Conclusion: I can feed this into an ADC and do the lock-in detection with DSP methods with at least 3 bits (but probably several more) of desired signal. (This is better than the Hamamatsu chip, which gives 1 bit of info.)
+
+---
+
+At 0.4 A/W on that photodiode, 3.195 W of incident LED power would give me a 1.278 µA received signal. (The sunlight would cause maybe 100 µA or so.)
