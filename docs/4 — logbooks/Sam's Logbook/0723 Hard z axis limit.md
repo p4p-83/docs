@@ -15,3 +15,7 @@ I then use the cone itself as the moving part of the limit switch. Depending on 
 And the motion of the cone? I'd support it in such a way as to provide it with a limited amount of travel. Thus, after the nozzle contacts the component, there is ~1 mm travel until the component starts contacting the shroud. Then, ~1 mm later, the shroud makes switch contact. Perhaps ~1 mm after that, if the electronics have failed to register that the limit has been reached, the cone bottoms out. The nozzle itself has ~6 mm travel, so it won't sustain any damage. Instead, the full load of the z axis will be supported by the cone. Ideally it wouldn't come to this, but if it did there would be a (small) chance that the cone would protect the nozzle, and some other part of the system would give.
 
 There shouldn't be any problem with the cone pushing the component off, as it nominally sits ~1 mm back. If the component is touching the cone, it's because something is pushing it into the cone, and therefore the component isn't going anywhere.
+
+---
+
+Probably it goes without saying at this point, but the discussed cone would be (99% chance) something I 3D print out of white PLA.
