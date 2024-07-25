@@ -1,3 +1,7 @@
+![](Screenshot%202024-07-25%20at%2020.27.38.png)
+
+I drew that cone idea up in CAD. The cone contact is visible in the 'brass' colour toward the back of the model.
+
 Made a 3D print of it, and that worked acceptably well. This was designed for a 6 mm brass flat strip to be used to bridge the contacts. The same strip stock would be used to create four hooks by bending their ends 90°. The body of them would then pass through the plastic stepper mounting bracket and could be dealt with (ie soldered to) on the other side.
 
 Still no real idea how you remove the cone once installed? (In theory, you'd have to do this reasonably regularly, assuming the nozzles are interchangeable.)
