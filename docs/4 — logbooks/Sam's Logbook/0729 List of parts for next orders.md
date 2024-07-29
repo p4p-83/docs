@@ -7,6 +7,7 @@ Starting to identify a few things that I'm either missing or now short on. Bette
 - M2.6 (?) screws to secure the nozzle motor.
 - Flanged radial bearings.
 - Sealed jiffy box (for the vacuum reservoir).
+- Another CM3 (with IR filter)
 
 Also a few things still to think about.
 
