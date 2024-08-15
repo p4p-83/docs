@@ -15,7 +15,6 @@ Starting to identify a few things that I'm either missing or now short on. Bette
 - [Pressure sensors on PCBs](https://surplustronics.co.nz/products/10847-precision-altimeter-atmospheric-pressure-bmp280-sensor-module) (at least 3)
 - A few Arduinos
 - A USB hub
-- A new brain
 
 Also a few things still to think about.
 
