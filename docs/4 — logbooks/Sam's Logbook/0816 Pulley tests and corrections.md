@@ -6,7 +6,7 @@ I made a print of it. It fits on the shaft of the stepper. There is a small amou
 
 ![](IMG_1514.jpeg)
 
-Unfortunately, the belt doesn't quite fit. It feels as though there's about one tooth too many. I found [a white paper by the belt designer](https://assets.gates.com/content/dam/gates/home/knowledge-center/mectrol/whitepapers/belt-theory06sm.pdf), Gates, that provides some mathematical identities, and I've used these to try to work out a correction factor for my next print.
+Unfortunately, the belt doesn't quite fit. It feels as though there's about one tooth too many. I found [a white paper](https://assets.gates.com/content/dam/gates/home/knowledge-center/mectrol/whitepapers/belt-theory06sm.pdf) by belt designer Gates, that provides some mathematical identities, and I've used these to try to work out a correction factor for my next print.
 
 ![](IMG_1512.jpeg)
 
