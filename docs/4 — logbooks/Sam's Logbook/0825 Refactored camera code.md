@@ -145,7 +145,9 @@ Goodbye, 3 hours of my life. Nice knowing you.
 
 Yeah. It works now. ~~The latency isn't so flash, but I don't know if that's just my hardware and networking etc or if it's my new code being genuinely awful. (And I don't actually *want* to know at this point in time, so any diagnostic work on this front can wait for another day.)~~ I dropped the resolution back the a value comparable to James' original setting, and the latency improved. It's still not a million dollars, but whatever — I've got bigger fish to fry at the moment.
 
-Here's the code that is doing the stuff, for the records. (It's also [here.](https://github.com/p4p-83/interface/pull/3))
+~~Here's the code that is doing the stuff, for the records. (It's also [here.](https://github.com/p4p-83/interface/pull/3))~~
+
+Note: this is very out of date now. See the GitHub instead.
 
 ```julia
 # run.jl
@@ -361,3 +363,7 @@ function main()
 
 end
 ```
+
+---
+
+It's later in the day, and I've just got compositing to work. See the GitHub for the demo. I've recorded the script that made the data file [here](0825%20Compositing%20tests.md).
