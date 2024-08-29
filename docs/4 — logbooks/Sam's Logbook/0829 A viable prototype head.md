@@ -46,3 +46,5 @@ Been to uni and installed it on the machine. Some more issues observed.
 - I used woodscrews to secure the Pi to the bracket (given the tapping problem).
 
 There might have been more, but I didn't write them down at the time did I, and so I very much can't remember them now…
+
+I also clean forgot that I'm supposed to be making something up for the **lighting / illumination of components**, and also making a **nozzle cone**. Oops. Better get to that and factor these in before I do the next round of prints.
