@@ -29,5 +29,20 @@ I drafted a crude bracket so I can bring the thing in and put it on the frame. I
 - The camera is pictured in CAD in its ideal position for the current setup. It's way off in no-man's land and it makes the whole assembly ~350 mm long. That's ridiculous, and so I haven't made a bracket for it just yet. Should I perhaps fold the optical axis? Should I change the camera-nozzle offset angle from 90° to something else?
 - I've not added a belt tensioner for the stepper, only some slots to allow it to in theory be installed with the belt taut. Does it need a tensioner? (If I do install a tensioner, it must be on the bottom part of the belt, as the top part is load bearing and thus we would end up with an error as the torque on the pulley fights it out with the tensioner spring.)
 - Also the footprint of the whole thing is also rather large. Could I perhaps put the second, belt driving stepper above the first stepper? Not my preferred aspect ratio but it would recover a little bit of travel, and it seems like I'm going to have to make more use of the vertical dimension anyway just to bring the B camera back in a bit.
+	- This one is mostly inspired by the fact that the nozzle protrudes by a certain amount and that the arc traced by the nozzle is outside the present footprint of the design. Ideally I would move the supporting rail blocks so that the combined footprint is as small as possible, and this means biasing the design in this direction, but the B stepper is currently preventing me from reducing it at the back. Moving the stepper up would allow me to change the stance of the design and have a smaller footprint.
 
-Also I did wonder about using some sort of lens and mirror setup to split the view of the B camera in order to get a 90° shot of the nozzle so that we can align things more easily.
+Also I did wonder about using some sort of lens and mirror setup to split the view of the B camera in order to get a 90° shot of the nozzle so that we can align things more easily. Not entirely sure how this would go, but it might be worth just trying for fun if I can find a straightforward place for the mirror.
+
+---
+
+Been to uni and installed it on the machine. Some more issues observed.
+
+- I entirely forgot the clips needed to attach it to the *y* axis belt!
+- The linear rail bearing blocks clearly don't match the hole drill pattern that I found online, and so I can't get all the screws in.
+- While I'm at it, I should really put slots in to mount to the secondary linear rail bearing blocks — the current design preloads the rail more than it should.
+- I forgot to make the B stepper shaft hole into a slot.
+- In its current position, the Raspberry Pi's ethernet and USB ports mightn't be accessible if a deeper stepper motor is installed.
+- I don't really have any M4 screws of the appropriate length to fix to the rail blocks (given the 5 mm (?) base of the bracket).
+- I used woodscrews to secure the Pi to the bracket (given the tapping problem).
+
+There might have been more, but I didn't write them down at the time did I, and so I very much can't remember them now…
