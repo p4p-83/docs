@@ -30,6 +30,13 @@ I'm going to call it here for the day, but hopefully things continue reasonably 
 - Add a nozzle cone and limit switch. Hopefully this won't be too difficult though, given that there's a subassembly already there that I can pretty much edit in place to do this.
 - Add provision for lighting. (Yeah, that elephant in the room…)
 I imagine that these last few steps are going to end up making a mounting bracket that 100% should be made either from sheet metal or perhaps plywood (given the probable thinness and overall size it'll be) but that I'll probably have to 3D print regardless, at least for now. (But who knows, maybe I'll have more ideas when I start to see it emerging onscreen.)
+
+---
+
+Worst comes to worst, if there's play in it and if it's due to the spacing of the bearings being inadequate, I can try to source 200 mm rods and just make a second set of bearings way up the top of the platter, beyond the belt grabber part. This should eliminate any and all motion and also it's something that I can add on after the fact with almost no redesign needed.
+
+I'm not going to add it yet — ain't got no 200 mm rails, do I — but it's nice to know that this concept is shaping up to give me more flexibility to solve any problems, unlike the other designs and their propensity to throw me off the cliff when I needed more degrees of freedom.
+
 ---
 
 For reference, this platter design originated from the following sketch (lower half of page) in my "logbook". (One of these days I will have to collect up all of my physical sketches done for this project and record them digitally…)
