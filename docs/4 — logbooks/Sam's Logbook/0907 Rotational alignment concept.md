@@ -1,3 +1,8 @@
+
+> [!NOTE]
+> Already supplanted by [0907 Rotational alignment concept development](0907%20Rotational%20alignment%20concept%20development.md)
+
+
 I've been trying to think through how alignment could work, and it's really a little challenging. Presently I'm trying to see if there's any overly simple method of doing it, and the most bare-bones method I could think of is a simple least-squares line of best fit on a scatter plot of the polar-coord-space angle of each centroid.
 
 ```julia
