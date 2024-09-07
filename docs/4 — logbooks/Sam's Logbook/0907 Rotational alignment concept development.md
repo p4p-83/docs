@@ -106,7 +106,7 @@ bins = zeros(Float64, numBins)
 ## work out argument bands
 
 leadCoords = [(abs(l), angle(l)) for l in leads]
-argTol = 0.5 # hard-code
+argTol = 0.5 # hard-code for now, TODO base it on centroid weights later
 
 ## go pad-wise
 
@@ -163,3 +163,53 @@ scatter!(leads, color=:magenta, label="leads")
 scatter!(newPads, color=:lightgreen, xlims=(-5, 5), ylims=(-5, 5), label="pads (best fit)") |> display
 savefig("after-bins.png")
 ```
+
+## More improvements
+
+Now without branching!
+
+Yeah, I began implementing the misalignment quality function. Still doesn't use centroid weights (just uses the hyperbolic secant function — seems to be shaping up to be my favourite function of the year!).
+
+Here's the relevant parts of the code:
+
+```julia
+## work out argument bands
+
+leadCoords = [(abs(l), angle(l)) for l in leads]
+
+## go pad-wise
+
+for p in pads
+
+	r = abs(p)
+	φ = angle(p)
+
+	# see which arg bands it might touch
+	for (r_l, φ_l) in leadCoords
+
+		# calculate the quality of the match
+		radiusMismatch = r_l - r
+		selectivity = 5
+		quality = sech(selectivity*radiusMismatch)
+
+		# calculate the angle required for this match
+		angle = φ - φ_l
+		while angle < 0deg angle += 360deg end
+		while angle >= 360deg angle -= 360deg end
+
+		# find the relevant bin
+		binNum = 1 + (angle/binSize |> floor |> Int)
+
+		# store in the bin
+		bins[binNum] += quality
+
+	end
+
+end
+```
+
+And here's the new ranking chart:
+
+![](ranking-bins%201.png)
+
+Look at them sidebands!
