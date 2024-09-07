@@ -110,3 +110,9 @@ We look at the difference in the intercept of the two lines of best fits, as thi
 I have observed that any negative *y* offset in the reference pad, however slight, will wreak havoc with the placement. A positive offset will create a rotational error too, but nowhere near as severely or quickly and this might be something that can be corrected for if the slope of the line of best fit is constrained to unity. I have (as above) tested the effect of a scale error and it seems that this is tolerated just fine (I guess because the angles remain in the same order). I have yet to test the effects of neighbouring unrelated pads.
 
 This approach isn't perfect, but I think it shows that a statistical approach could be the way to go.
+
+---
+
+- Perhaps the reference pad should be removed from the set of pads being tested?
+- Perhaps the argument (you know, the polar radius) could/should be used to select which pads can match with which other pads so that the matches are optimised for quality.
+- We can then use the average angular error of the matched pairs to calculate the correction angle. (This would probably be possible if we neglected angle when doing the matching of pads.)
