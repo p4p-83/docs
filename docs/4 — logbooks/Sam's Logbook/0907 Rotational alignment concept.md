@@ -116,3 +116,18 @@ This approach isn't perfect, but I think it shows that a statistical approach co
 - Perhaps the reference pad should be removed from the set of pads being tested?
 - Perhaps the argument (you know, the polar radius) could/should be used to select which pads can match with which other pads so that the matches are optimised for quality.
 - We can then use the average angular error of the matched pairs to calculate the correction angle. (This would probably be possible if we neglected angle when doing the matching of pads.)
+
+Alternatively, what about a "two point" approach? You take the most salient lead centroid and look for an appropriately salient and plausibly positioned pad centroid on the board. You then maybe use a third point as a check point, but basically, you try to define the rotation based on this second pad.
+
+- This approach lends itself to direct user input as a possible fallback.
+- I guess the stats approach is the expansion of this — but perhaps I implement with two points first (so I can figure out how that works) and then work on generalising it / improving the robustness with some stats.
+- A "two point" approach would be great for resistors and capacitors and whatnot, as their shouldn't (if we make high quality masks) be any more than two centroids on these — they have but two leads!
+- Ranking by centroid saliency and limiting the number of them used would in theory help improve robustness against mask noise.
+
+Notice that if I implement this approach, I have three stages, and the following rhythm:
+
+1. Snap the reference pad. This pays attention to only 1 centroid.
+2. Snap the rotation. This has now factored in 2 centroids.
+3. Optimise the fit. This factors in all of the centroids.
+
+I think this brings back a bit closer to the original idea (which was supposedly reasonably easy to do).
