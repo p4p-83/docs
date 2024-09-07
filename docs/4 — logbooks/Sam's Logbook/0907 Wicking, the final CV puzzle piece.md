@@ -25,6 +25,8 @@ We then just apply opposite positional and rotational offsets to the pads to cor
 > 
 > This may be something to keep in mind in future if weighting by centroids (will have to consider weighting the reference centre of the component too).
 > 
+> I've also added a weighting and modified the angular error calculation function to deal with a few glitches I was observing.
+> 
 > (I've also added some `sleep`s in there so that you can watch the algorithm tackle the problem. You can still replay this as normal using the plot navigation arrows in VS Code.)
 
 ```julia
@@ -62,7 +64,7 @@ leads::Vector{ComplexF64} = [
 	+2 + 0j
 	# +2 - 1j
 
-	# +1 - 2j
+	+1 - 2j
 	# +0 - 2j
 	# -1 - 2j
 
@@ -70,13 +72,16 @@ leads::Vector{ComplexF64} = [
 	-2 + 0j
 	-2 + 1j
 
+	4.5
+	4.5 + 4.5j
+
 ]
 
 # pads
 pads = copy(leads)	# we'll start with them matching, but they could be in literally any order (well, not really, but we'll go with it for now)
-pads .*= exp(j*9deg)
+pads .*= exp(j*-8deg)
 pads .*= 1.1	# scale factor, might occur on a board
-pads .+= 0.15 - 0.05j	# mostly taken out by the positioning step, but still worth simulating
+pads .+= 0.4 + 0.1j	# mostly taken out by the positioning step, but still worth simulating
 
 ## work coordinate system
 
@@ -87,9 +92,9 @@ leads .-= pivot
 ## vis
 
 scatter(pads, color=:lightgreen, xlims=(-5, 5), ylims=(-5, 5), label="pads")
-scatter!(leads, color=:magenta, label="leads", title="Before wicking") |> display
+scatter!(leads, color=:black, label="leads", title="Before wicking") |> display
 savefig("images/before-wicking.png")
-sleep(1)
+# sleep(1)
 
 ## make pairs
 
@@ -131,30 +136,31 @@ quiver!([0], [0], quiver=([real(posError)], [imag(posError)]), color=:lightblue,
 
 function angularError(lever, arm)
 	a = angle(lever+arm) - angle(lever)
-	while a < 0 a += 360deg end
-	while a >= 360deg a -= 360deg end
+	while a < -180 a += 360deg end
+	while a >= 180deg a -= 360deg end
+	println(a)
 	return a
 end
 
+errorLeverLengths = abs.(errorLevers)
 angleAdjustments = angularError.(errorLevers, errorArms)
-rotationalError = mean(angleAdjustments)
+rotationalError = mean(angleAdjustments .* errorLeverLengths) / mean(errorLeverLengths)
 
+# plotting
 guideStart = 4j
 guideEnd = guideStart*exp(j*rotationalError)
 guideDiff = guideEnd - guideStart
-
 quiver!([real(guideStart)], [imag(guideStart)], quiver=([real(guideDiff)], [imag(guideDiff)]), color="#777")
 plot!([0+0j, guideEnd], linestyle=:dash, color="#777") |> display
 savefig("images/analysed-wicking.png")
-sleep(1)
+#sleep(1)
 
 ## correct that error
-
 pads .-= posError
 pads .*= exp(-j*rotationalError)
 
 scatter(pads, color=:lightgreen, xlims=(-5, 5), ylims=(-5, 5), label="pads")
-scatter!(leads, color=:magenta, label="leads", title="After wicking") |> display
+scatter!(leads, color=:black, label="leads", title="After wicking") |> display
 savefig("images/after-wicking.png")
 
 rotationalError/1deg
