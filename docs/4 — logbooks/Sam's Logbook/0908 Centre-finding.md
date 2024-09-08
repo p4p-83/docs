@@ -47,7 +47,7 @@ And another.
 
 I'm drawing grids of lines perpendicular to each movement arrow. While there are a lot of intersections, it seems that there is still a way to predict the centre point: draw a perpendicular line from the centre of each movement arrow outwards. The intersection of these gives the centre of rotation.
 
-![](finding%20the%20centre%20of%20rotation%205.png)
+![](finding%20the%20centre%20of%20rotation%207.png)
 
 This method feels kind of obvious in hindsight. While I still don't have an algorithmic way to empirically choose a centre point when these lines don't 100% agree, I feel that this is a definite step in the right direction.
 
@@ -67,7 +67,7 @@ So to recap, the straight line connecting the start and end points (which is obs
 This last visualisation used some slightly more sophisticated plotting code.
 
 ```julia
-using Plots; default( fontfamily="LinLibertine_Rah", size=(720, 720), label="", background_color=:transparent, foreground_color="#777", dpi=300 )
+using Plots; default( fontfamily="LinLibertine_Rah", size=(720, 720), label="", background_color="#fffe", background_color_inside=:transparent, foreground_color="#777", dpi=300 )
 
 deg = 2π/360
 j = im
