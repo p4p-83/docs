@@ -178,3 +178,17 @@ I guess now I have two options going forward.
 That said, both of those options are probably just different sides of the same mathematical relationship, and so I probably just have to do the maths first and then work out the most efficient / straightforward implementation from that.
 
 Programmatically speaking, I have one thing left to implement before this can truly be of use: I need some code to find the intersection of a pair of perpendicular bisectors. I suspect I'll do this algebraically first and then code in the results. (In a working implementation, I'll calculate the intersection point for each possible pairing of perpendicular bisectors — it's the damn handshake problem again — and then average this point out to work out where the effective centre is. I don't expect all of the real lines to line up so nicely at exactly the same point.)
+
+---
+
+Here's where I think I'll go next.
+
+1. Perform this analysis to get the equivalent centre of rotation. (Includes doing the math to numerically pinpoint it.)
+2. Calculate the required angle of rotation.
+3. Assume the head is at (0,0). Work out where the equivalent centre of rotation will end up after rotating the head by the calculated amount.
+4. Calculate the required translation that will put the equiv centre of rotation back to where it was.
+5. Drive the head by the calculated rotational amount and drive the gantry by the calculated translational amount.
+
+There. Easy math. Just like spinning a piece of paper about an off-centre finger. (Yes, that's how I worked this algorithm out.)
+
+~~The only issue I can see is if there is no rotation needed, and only translation — this could send the centre of rotation out to infinity. I may need to check the position of the centre of rotation, and if it starts flying well away I'll just assume that only translation is required for the time being and short-circuit the above algorithm (just average the vectors and move by that amount). (I could redo the whole algorithm to do translation first, rotation second, but I'm a bit too partial to the above algorithm to do that just at the moment.)~~ I can achieve this by just introducing a parallelism test when doing the peerwise perp. bisector intersection tests. If two perp. bisectors are parallel or essentially parallel, I will just exit that comparison early and not push any intersection point. In the case of pure translation, all of the perpendicular bisectors will be parallel, and therefore no intersection points will be pushed; I can therefore just do a branch to the pure translation correction if I find that there is no centre point. I've realised that I need to do the parallelism test anyway, as parallel lines have no intersection point, and almost-parallel lines will give overly poor-quality data (given there'll be a little bit of noise on each point and thus each angle).
