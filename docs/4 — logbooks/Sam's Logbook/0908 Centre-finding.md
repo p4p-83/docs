@@ -133,3 +133,48 @@ quiver!(points, quiver=reim.(movements), color=:black)
 savefig("images/finding the centre of rotation.png")
 plot!() |> display
 ```
+
+But what happens when there's also a position error? What then?
+
+Let's change the relevant section of code and find out.
+
+```julia
+centre = 1+0j
+rotation = 30deg
+
+offset = 1+0j
+
+points = [-2+2j, 1+1j, 2+0j]
+points2 = (points.-centre) .* cis(rotation) .+ centre .+ offset
+movements = points2 .- points
+
+scatter([centre], xlims=(-3,3), ylims=(-3,3), color=:white, label="centre of rotation")
+
+# drawArc.(points)
+drawPerpLines.(movements)
+drawPerpBisectors.(points2, points)
+# drawIsoscelesTriangle.(points2, points)
+
+scatter!(points, color=:lightblue, label="start")
+scatter!(points2, color=:lightgreen, label="end")
+
+quiver!(points, quiver=reim.(movements), color=:black)
+
+savefig("images/finding the centre of rotation.png")
+plot!() |> display
+```
+
+![](finding%20the%20centre%20of%20rotation%208.png)
+
+Reassuringly, the code still finds a centre of rotation, but it's not in the same place. This is fascinating, as it's not the behaviour I expected (I didn't really expect it to produce a coherent result), and maybe not the most useful or relevant behaviour — I can't move the centre of rotation of the nozzle. However, if this works then that's probably fine — I'll just do a compound movement to achieve the required rotation and position shift.
+
+The most interesting thing is that it seems that the code has identified a centre of rotation that would cancel all of the translational offsets too. I did not even consider that as a possibility…
+
+I guess now I have two options going forward.
+
+- I try to correct for the translation error first. I guess you define the "zero error" position as the position where the centre of rotation is aligned with the nozzle's centre of rotation.
+- I just do the above perpendicular bisector analysis first and then somehow decompose the results of that into a translation and rotation.
+
+That said, both of those options are probably just different sides of the same mathematical relationship, and so I probably just have to do the maths first and then work out the most efficient / straightforward implementation from that.
+
+Programmatically speaking, I have one thing left to implement before this can truly be of use: I need some code to find the intersection of a pair of perpendicular bisectors. I suspect I'll do this algebraically first and then code in the results. (In a working implementation, I'll calculate the intersection point for each possible pairing of perpendicular bisectors — it's the damn handshake problem again — and then average this point out to work out where the effective centre is. I don't expect all of the real lines to line up so nicely at exactly the same point.)
