@@ -255,3 +255,106 @@ Et voilà! Just like magic:
 ![](finding%20the%20centre%20of%20rotation%209.png)
 
 Probably there is some vector method of doing it, but screw that. I've not used a single vector yet, and I don't plan to change that without them making a very compelling case for themselves. Phasors all the way!
+
+---
+
+I messed around with a few random formulae, and it seems I can predict the location of the effective centre of rotation. No idea if this will ever be useful, but it is interesting.
+
+```julia
+using Plots; default( fontfamily="LinLibertine_Rah", size=(720, 720), label="", background_color="#fffe", background_color_inside=:transparent, foreground_color="#777", dpi=300 )
+
+deg = 2π/360
+j = im
+
+function drawPerpLines(movement)
+
+	pllel = cis(angle(movement))
+	perp = j*pllel
+
+	for n ∈ -5:1:5
+		plot!([n*pllel - 10perp, n*pllel + 10perp], color="#ccc")
+	end
+end
+
+function drawPerpBisectors(endpoint, startpoint)
+	movement = endpoint - startpoint
+	midpoint = 0.5*(endpoint+startpoint)
+
+	bisectorHeading = cis(angle(j*movement))
+
+	trace = [midpoint-10bisectorHeading, midpoint+10bisectorHeading]
+	scatter!([midpoint], color="navy", markershape=:xcross)
+	plot!(trace, color="navy", linestyle=:dashdotdot)
+
+end
+
+function drawArc(p)
+
+	arc = [(p-centre) * cis(r) + centre for r ∈ 0:1deg:rotation]
+	plot!(arc, color="navy", linestyle=:dashdot)
+
+	arc = [(p-centre) * cis(r) + centre for r ∈ 0:1deg:360deg]
+	plot!(arc, color="navy", linestyle=:dashdot, linealpha=0.2)
+
+end
+
+function drawIsoscelesTriangle(endpoint, startpoint)
+
+	plot!([centre, startpoint, endpoint, centre], color="navy", linestyle=:dashdotdot, linealpha=0.2)
+
+end
+
+centre = 1+0.1j
+rotation = 30deg
+
+offset = 1.3+0.1j
+
+points = [-2+2j, 1+1j, 2+0j]
+points2 = (points.-centre) .* cis(rotation) .+ centre .+ offset
+movements = points2 .- points
+
+scatter([centre], xlims=(-3,3), ylims=(-3,3), color=:white, label="centre of rotation")
+
+# drawArc.(points)
+drawPerpLines.(movements)
+drawPerpBisectors.(points2, points)
+# drawIsoscelesTriangle.(points2, points)
+
+scatter!(points, color=:lightblue, label="start")
+scatter!(points2, color=:lightgreen, label="end")
+
+quiver!(points, quiver=reim.(movements), color=:black)
+
+# find the centre
+
+function getPerpBisector(startpoint, endpoint)
+	chord = endpoint - startpoint
+	midpoint = 0.5 * (endpoint + startpoint)
+	perpAngle = angle(j*chord)
+
+	slope = tan(perpAngle) # m
+	intercept = imag(midpoint) - slope*real(midpoint)
+
+	return (intercept, slope)
+
+end
+
+(b1, m1) = getPerpBisector(points[1], points2[1])
+(b2, m2) = getPerpBisector(points[2], points2[2])
+
+interceptx = (b2-b1)/(m1-m2)
+intercepty = m1*interceptx + b1
+
+intercept = interceptx + j*intercepty
+
+scatter!([intercept], color=:red, label="intercept point!")
+
+println("predicted effective centre of rot. ( $((pecr = centre+offset*cis(90deg-rotation)+j*offset) |> real) , $(imag(pecr)) )")
+println("found effective centre of rotation ( $interceptx , $intercepty )")
+
+# predicted effective centre of rot. ( 1.463397459621556 , 2.5758330249197705 )
+# found effective centre of rotation ( 1.463397459621556 , 2.5758330249197714 )
+
+savefig("images/finding the centre of rotation.png")
+plot!() |> display
+```
