@@ -1,0 +1,135 @@
+So, the maths in [0908 Actually doing the maths](0908%20Actually%20doing%20the%20maths.md) was painful. I need a bit of a different approach. Here's one: can I find the centre of rotation by inspection?
+
+```julia
+using Plots; default( fontfamily="LinLibertine_Rah", size=(720, 720), label="", background_color=:transparent, foreground_color="#777", dpi=300 )
+
+deg = 2π/360
+j = im
+
+function drawPerpLines(movement)
+
+	pllel = cis(angle(movement))
+	perp = j*pllel
+
+	for n ∈ -5:0.25:5
+		plot!([n*pllel - 10perp, n*pllel + 10perp], color="#ccc")
+	end
+end
+
+centre = 1+0j # adjust the centre of rotation here
+
+points = [-2+2j, 1+1j, 2+0j]
+points2 = (points.-centre) .* cis(30deg) .+ centre
+movements = points2 .- points
+
+scatter([centre], xlims=(-3,3), ylims=(-3,3), color=:white, label="centre of rotation")
+
+drawPerpLines.(movements)
+
+scatter!(points, color=:lightblue, label="start")
+scatter!(points2, color=:magenta, label="end")
+
+quiver!(points, quiver=reim.(movements), color=:black)
+
+savefig("images/finding the centre of rotation.png")
+plot!() |> display
+```
+
+Here we have a rotation about the origin.
+
+![](finding%20the%20centre%20of%20rotation.png)
+
+Not too difficult. Here's another one, this time with the centre of rotation offset a bit.![](finding%20the%20centre%20of%20rotation%201.png)
+
+And another.
+
+![](finding%20the%20centre%20of%20rotation%202.png)
+
+I'm drawing grids of lines perpendicular to each movement arrow. While there are a lot of intersections, it seems that there is still a way to predict the centre point: draw a perpendicular line from the centre of each movement arrow outwards. The intersection of these gives the centre of rotation.
+
+![](finding%20the%20centre%20of%20rotation%205.png)
+
+This method feels kind of obvious in hindsight. While I still don't have an algorithmic way to empirically choose a centre point when these lines don't 100% agree, I feel that this is a definite step in the right direction.
+
+(Clearly I should have taken that NCEA L1 geometric reasoning topic more seriously…)
+
+I still don't feel entirely convinced, so here's an understanding of why this must work.
+
+- Pure rotation rotates all points around the same centre point.
+- Points in rotation about their centre point trace out circles centred about the centre point.
+- A line passing through the centre of a circle is called a diameter line. ([See this Wikipedia page for circle and chord terminology.](<https://en.wikipedia.org/wiki/Chord_(geometry)>))
+- A line between two points on the same circumference is called a chord. Any point on the circumference of a circle is by definition one radius away from the centre, so therefore any two circumference points will define an isosceles triangle with the circle's centre point.
+- The start point and end point from the rotation are, as above, part of the circumference, and so therefore define isosceles triangles.
+- The perpendicular bisector of the chord between the start and end points is therefore co-linear with the line of symmetry through the isosceles triangle and thus also co-linear with the diameter of the circle, and therefore co-incident with the centre point of the circle.
+
+So to recap, the straight line connecting the start and end points (which is observed error line) is a chord on circle of constant radius and the outside side of an isosceles triangle made with the centre of rotation, and thus its perpendicular bisector is guaranteed to coincide with the origin. I can therefore pinpoint the centre of rotation with only two sets of points, as expected.
+
+This last visualisation used some slightly more sophisticated plotting code.
+
+```julia
+using Plots; default( fontfamily="LinLibertine_Rah", size=(720, 720), label="", background_color=:transparent, foreground_color="#777", dpi=300 )
+
+deg = 2π/360
+j = im
+
+function drawPerpLines(movement)
+
+	pllel = cis(angle(movement))
+	perp = j*pllel
+
+	for n ∈ -5:1:5
+		plot!([n*pllel - 10perp, n*pllel + 10perp], color="#ccc")
+	end
+end
+
+function drawPerpBisectors(endpoint, startpoint)
+	movement = endpoint - startpoint
+	midpoint = 0.5*(endpoint+startpoint)
+
+	bisectorHeading = cis(angle(j*movement))
+
+	trace = [midpoint-10bisectorHeading, midpoint+10bisectorHeading]
+	scatter!([midpoint], color="navy", markershape=:xcross)
+	plot!(trace, color="navy", linestyle=:dashdotdot)
+
+end
+
+function drawArc(p)
+
+	arc = [(p-centre) * cis(r) + centre for r ∈ 0:1deg:rotation]
+	plot!(arc, color="navy", linestyle=:dashdot)
+
+	arc = [(p-centre) * cis(r) + centre for r ∈ 0:1deg:360deg]
+	plot!(arc, color="navy", linestyle=:dashdot, linealpha=0.2)
+
+end
+
+function drawIsoscelesTriangle(endpoint, startpoint)
+
+	plot!([centre, startpoint, endpoint, centre], color="navy", linestyle=:dashdotdot, linealpha=0.2)
+
+end
+
+centre = 1+0j
+rotation = 30deg
+
+points = [-2+2j, 1+1j, 2+0j]
+points2 = (points.-centre) .* cis(rotation) .+ centre
+movements = points2 .- points
+
+scatter([centre], xlims=(-3,3), ylims=(-3,3), color=:white, label="centre of rotation")
+
+drawArc.(points)
+drawPerpLines.(movements)
+drawPerpBisectors.(points2, points)
+drawIsoscelesTriangle.(points2, points)
+
+scatter!(points, color=:lightblue, label="start")
+scatter!(points2, color=:lightgreen, label="end")
+
+quiver!(points, quiver=reim.(movements), color=:black)
+
+
+savefig("images/finding the centre of rotation.png")
+plot!() |> display
+```

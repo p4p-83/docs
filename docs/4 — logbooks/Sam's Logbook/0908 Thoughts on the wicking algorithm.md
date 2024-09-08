@@ -1,3 +1,6 @@
+> [!NOTE]
+> See [0908 Actually doing the maths](0908%20Actually%20doing%20the%20maths.md) instead
+
 I feel that I don't properly understand the wicking algorithm and that my implementation is a little haphazard. I got it working and corrected all the glitches that I'm aware of by trial and error. While it seems to be passable and probably good enough to put into the prototype machine, I do want to understand it a bit better so I can refactor it to be more clear, so that I can prove it works, and importantly, so I can properly describe it in the research report.
 
 To this end, I've started trying to view it through a lens quite similar to that of the Gram-Schmitt orthogonalisation procedure — I have, in a sense, three basis functions (counterclockwise-clockwise, right-left, up-down) that describe the possible component movements — and I wish to take all of the individual error vectors and decompose them into movements along these three axes.
