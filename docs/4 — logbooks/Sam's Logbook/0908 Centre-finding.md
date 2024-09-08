@@ -258,7 +258,7 @@ Probably there is some vector method of doing it, but screw that. I've not used 
 
 ---
 
-I messed around with a few random formulae, and it seems I can predict the location of the effective centre of rotation. No idea if this will ever be useful, but it is interesting.
+~~I messed around with a few random formulae, and it seems I can predict the location of the effective centre of rotation. No idea if this will ever be useful, but it is interesting.~~ Doesn't work for different angles.
 
 ```julia
 using Plots; default( fontfamily="LinLibertine_Rah", size=(720, 720), label="", background_color="#fffe", background_color_inside=:transparent, foreground_color="#777", dpi=300 )
