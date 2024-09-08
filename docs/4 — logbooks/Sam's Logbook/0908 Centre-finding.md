@@ -64,6 +64,13 @@ I still don't feel entirely convinced, so here's an understanding of why this mu
 
 So to recap, the straight line connecting the start and end points (which is observed error line) is a chord on circle of constant radius and the outside side of an isosceles triangle made with the centre of rotation, and thus its perpendicular bisector is guaranteed to coincide with the origin. I can therefore pinpoint the centre of rotation with only two sets of points, as expected.
 
+> [!DRAFT] Note for final report writing
+> If I find the need to make this proof in the final report, I think the best way to do it first starting with the centre point, doing a forward analysis, and only after that doing the reverse analysis.
+> 
+> Forward analysis starts with the centre point — we assume we know the centre point for the sake of the analysis — and observes that there will be a start point. It then notes that the end point will be revolved around this centre of rotation. Thus both points are clearly one radius away from the centre of the circle. We can then use these two radii as sides of an isosceles triangle, where the third side is the chord connecting the start and end points. We can then note that the isosceles triangle has a line of symmetry, and that line of symmetry is coincident with the centre of the circle. We can also note that the line of symmetry is at right angles to the chord (third side of the isosceles triangle) by symmetry, and that by symmetry it is also coincident with the midpoint of that chord. In other words, the line of symmetry is a perpendicular bisector of the chord, and thus a perpendicular bisector of the chord will be coincident with the centre of rotation.
+> 
+> We can therefore, in the reverse analysis, say that if we have two sets of start and end points, we can determine two chords. We can draw two perpendicular bisectors, one per chord, in full knowledge that the centre of the circle will be coincident with both. So long as these two perpendicular bisectors are not parallel, their point of intersection must be the centre of rotation. (If they are parallel and co-linear, we will need a third to define the point. If they are parallel but not co-linear, we can say that no rotation is required (although if the chords are non-zero in length, we still need a pure translation).)
+
 This last visualisation used some slightly more sophisticated plotting code.
 
 ```julia
