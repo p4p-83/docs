@@ -199,3 +199,59 @@ Here's where I think I'll go next.
 There. Easy math. Just like spinning a piece of paper about an off-centre finger. (Yes, that's how I worked this algorithm out.)
 
 ~~The only issue I can see is if there is no rotation needed, and only translation — this could send the centre of rotation out to infinity. I may need to check the position of the centre of rotation, and if it starts flying well away I'll just assume that only translation is required for the time being and short-circuit the above algorithm (just average the vectors and move by that amount). (I could redo the whole algorithm to do translation first, rotation second, but I'm a bit too partial to the above algorithm to do that just at the moment.)~~ I can achieve this by just introducing a parallelism test when doing the peerwise perp. bisector intersection tests. If two perp. bisectors are parallel or essentially parallel, I will just exit that comparison early and not push any intersection point. In the case of pure translation, all of the perpendicular bisectors will be parallel, and therefore no intersection points will be pushed; I can therefore just do a branch to the pure translation correction if I find that there is no centre point. I've realised that I need to do the parallelism test anyway, as parallel lines have no intersection point, and almost-parallel lines will give overly poor-quality data (given there'll be a little bit of noise on each point and thus each angle).
+
+---
+
+More progress!
+
+[Wikipedia did most of my math for me.](https://en.wikipedia.org/wiki/Line–line_intersection)
+
+I wrote the recipe out by hand:
+
+![](Image%209.jpeg)
+
+I got it [working in Desmos.](https://www.desmos.com/calculator/kztsfdhrnt)
+
+I then put some demo code in for it.
+
+```julia
+# … previous code
+quiver!(points, quiver=reim.(movements), color=:black)
+
+# NEW CODE BEGINS
+
+# find the centre
+
+function getPerpBisector(startpoint, endpoint)
+	chord = endpoint - startpoint
+	midpoint = 0.5 * (endpoint + startpoint)
+	perpAngle = angle(j*chord)
+
+	slope = tan(perpAngle) # m
+	intercept = imag(midpoint) - slope*real(midpoint)
+
+	return (intercept, slope)
+
+end
+
+(b1, m1) = getPerpBisector(points[1], points2[1])
+(b2, m2) = getPerpBisector(points[2], points2[2])
+
+interceptx = (b2-b1)/(m1-m2)
+intercepty = m1*interceptx + b1
+
+intercept = interceptx + j*intercepty
+
+scatter!([intercept], color=:red, label="intercept point!")
+
+# NEW CODE ENDS
+
+savefig("images/finding the centre of rotation.png")
+plot!() |> display
+```
+
+Et voilà! Just like magic:
+
+![](finding%20the%20centre%20of%20rotation%209.png)
+
+Probably there is some vector method of doing it, but screw that. I've not used a single vector yet, and I don't plan to change that without them making a very compelling case for themselves. Phasors all the way!
