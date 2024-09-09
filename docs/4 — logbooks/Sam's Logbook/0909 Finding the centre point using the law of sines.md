@@ -163,7 +163,10 @@ Also, geometrically speaking, there are actually two possible solutions to this 
 We can probably test for this scenario by comparing the angles of the normal vectors. If there is an angle of >90° between them, they are in opposition, and the present method is unfortunately incorrect.
 
 > [!QUESTION] Realism
-> How likely is this in practice? Is it physically possible? How would the correct behaviour even look?
+> ~~How likely is this in practice? Is it physically possible? How would the correct behaviour even look?~~
+> 
+>Yes, it's realistic. For one, it's caused by a scale factor.
+
 
 ![](verification-of-vcr-code.png)
 
@@ -284,3 +287,4 @@ quiver!(midpoints, quiver=reim.(normals), color="#aaa")
 ```
 
 ![](verification-of-vcr-code%202.png)
+
