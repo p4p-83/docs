@@ -100,6 +100,31 @@ savefig("images/whydoesthemeanwork.png")
 
 No idea how I can more conclusively prove this in my report, but this understanding will have to do for now.
 
+> [!IDEA] A proof
+> 
+> Because the translation has been corrected, only pure rotation remains. (Some scale error may also be present, but provided this is isotropic it will affect all rotations equally and thus cancel itself out for the purposes of this analysis.)
+> 
+> Because there is not translational error, the error vectors must sum to exactly zero.
+> 
+> The only thing that matters in pure rotation is the angular displacement, not the linear displacement. Any linear displacement at a particular radius has a corresponding angular displacement.
+> 
+> Because the error vectors were created by pure rotation, they must all have the same angular size.
+> 
+> The start points for the errors are located at arbitrary radii, so they may have different linear sizes. We can however simplify the problem by "normalising" these error vectors so that they start on the same unit circle. This can be done as this does not cause a visible change from the centre point.
+> 
+> Because these normalised error vectors had the same angular size and now have the same radius, they must all have the same linear size. Because they are the same size and must sum to zero, they must stack together head-to-tail to form a [regular polygon](https://en.wikipedia.org/wiki/Regular_polygon).
+> 
+> Because the angular sizes are the same and are by nature tangential to a circle traced through them and about the centre point, they must be equally spaced along such a circle.
+> 
+> The normalised start points are therefore equally distributed around the centre point and equidistant. Their mean therefore gives the centre point.
+> 
+> The converse is also true. The non-normalised start points, if at different radii, must have error vectors of different magnitudes in order to preserve their equal angular size. Therefore the non-normalised start points cannot be distributed equally if at different radii. They will be distributed such that their mean also gives the centre point, because otherwise their normalised forms would not form a regular polygon as proven above.
+> 
+> ---
+> 
+> This isn't a great proof. I think maybe I prove that the normalised forms must form the regular polygon first. I then extend that to say that the non-normalised forms must have an equivalent normalised form, otherwise they won't form a regular polygon and therefore don't correspond to pure rotation as we know they do. I somehow need to prove that the non-normalised start vects have the same mean as the normalised ones — I guess as far as this is concerned, I either say that the properties of both (angular size and linear sum) are conserved, and thus they are equivalent; or I find a mathematical equation for it that demonstrates it. I don't think I'll bother with either just at the moment.
+>
+
 ### The mean is the only thing that copes with scale errors
 
 In [[0909 Finding the centre point using the law of sines]] I discovered that the law of sines method absolutely fell apart when there was a scale error. I also found that the above method (remove the net position error then find the centre as the mean) is the only tool that can cope with the scenarios at hand.
