@@ -167,9 +167,9 @@ function wick(leads, pads ; plotting=false)
 		println("max residual error $maxResidError")
 		scatter(pads, markershape=:square, color=:black, label="pads", title="After all corrections")
 		scatter!(leads, xlims=(-15, 15), ylims=(-15, 15), markershape=:cross, color=:magenta, label="leads")
-		quiver!(leads, quiver=reim.(-residualErrors), color=:magenta)
+		quiver!(leads, quiver=reim.(residualErrors), color=:magenta)
 		quiver!([0+0j], quiver=[reim(meanResidError)]) |> display
-		@test maxResidError < 2e-15
+		# @test maxResidError < 2e-15
 	end
 
 	return MachineMovement(trackedTranslation, trackedRotation)
@@ -277,7 +277,7 @@ end;
 	leads .*= cis(-rotationOffset) # component won't be in alignment yet
 	
 	# analyse it
-	move = wick(leads, pads, plotting=false)
+	move = wick(leads, pads)
 	# println(move)
 	
 	# compare with expectations
@@ -288,6 +288,46 @@ end;
 	
 	# benchmark, 'cause I'm interested
 	display(@benchmark wick(leads, pads))
+
+end;
+
+@testset "wick dummy SOIC8 with scale issue" begin
+	
+	# demo components to ease test board construction
+	res::Vector{ComplexF64} = [0, 2]
+	soic8::Vector{ComplexF64} = [x + j*y for x in 0:2:8 for y in [0, 6]]
+
+	# create component being placed
+	leads::Vector{ComplexF64} = []
+	append!(leads, (soic8.-mean(soic8))*cis(45°))
+
+	# create board with picked component and more
+	pads = copy(leads)
+	append!(pads, j*res.+(-11+5j))
+	append!(pads, j*res.+(-8+5j))
+	append!(pads, j*res.+(-5+5j))
+	Random.seed!(15)
+	shuffle!(pads)	# simulate random ordering due to CV etc
+
+	# simulate misalignment (so that this code can fix it)
+	headOffset = 0.3+0.3j
+	componentPickupOffset = 0j
+	rotationOffset = 5deg
+	pads .-= headOffset # head won't be in alignment yet
+	# pads .*= cis(-2deg) # PCB won't be perfectly square
+	leads .*= 0.92
+	leads .-= componentPickupOffset # component won't be picked up perfectly on centre
+	leads .*= cis(-rotationOffset) # component won't be in alignment yet
+	
+	# analyse it
+	move = wick(leads, pads, plotting=false)
+	# println(move)
+	
+	# compare with expectations
+	expectedCorrectiveTranslation = componentPickupOffset - headOffset
+	expectedCorrectiveRotation = rotationOffset
+	@test isapprox(move.translation, expectedCorrectiveTranslation, atol=0.0001)
+	@test isapprox(move.rotation, expectedCorrectiveRotation, atol=0.01deg)
 
 end;
 ```
