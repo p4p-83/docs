@@ -92,3 +92,7 @@ quiver!([m1], quiver=[reim.(c_m1)])
 ```
 
 ![](triangulation%201.png)
+
+I actually still need to implement the parallelism check between `angle_n1` and `angle_n2`, but that's pretty trivial. I wonder if I also need a check to make sure `m1` and `m2` aren't too close together, or if the parallelism check would already prevent this from causing problems?
+
+The thing I like about this method is that the answer is in theory well defined regardless of the orientations of the normal vectors. Unlike the previous implementation, it won't immediately die if one of the normal vectors is vertical. The only way the length $\overrightarrow{CM_1}$ will go to zero is if the angle $\angle CM_1M_2$ is zero, which can only happen if the centre point is on top of $M_1$, so this is actually correct behaviour. The only way that the length $\overrightarrow{CM_1}$ can blow up to infinity is if the angle $\angle M_1CM_2$ goes to zero, and that can only happen if the lines are parallel or essentially parallel — this is something we test for and guard against anyway. Put simply, this method should be much better behaved that what yesterday's method would have achieved.
