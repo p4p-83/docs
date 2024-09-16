@@ -1,0 +1,9 @@
+I have been thinking for a few weeks now that perhaps the mechanical prototyping and development represents the biggest research effort on my behalf. *How can we design the mechanical aspects to best support the software?* And I feel I came to the best possible outcome *given this research direction*.
+
+However, I now see that we probably didn't have the the right question. With hindsight I can say that any mechanical approach (or at least all of the approaches that I have tried) are not worthwhile. Mechanical approaches are costly and time consuming to get right and a pain in the but generally and they make it overly difficult to hit tolerances. We shouldn't have done it mechanically: we should really have asked ourselves *how can we write the software so that we can achieve our goal using an existing desktop pick and place with minimal adaptions*.
+
+I now feel that we could have achieved everything that is still in scope using just a LumenPnP (and a nozzle cone). The only thing that our compound head mechanism adds is a live camera feed of the footprint, but we could equally have just taken a photo using the fixed footprint camera on a LumenPnP and then done a "digital twin"-esque approach and just added a layer to the compositing to simulate that feed. This should be possible on a machine like the LumenPnP, which is designed to be accurate enough to run semi-open loop anyway.
+
+I guess the takeaway is that you're kind of screwing yourself over if you start the project with a pen plotter and intentions to do the head with compound motions. There's so much engineering that has already gone into these desktop pick and places and it's silly to throw it away, given that I now see that the realtime operation can actually run on this.
+
+So, if the question asked was *what does it take to get real-time control working on a desktop pick and place?*, then the answer is *less than we thought*.
