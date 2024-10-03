@@ -3473,8 +3473,7 @@ Mathemtatical model is jsut those three cost functions
 
 - Draw contour plots
 
-- Inverse directivity
-- Inverse the damping
+- Inverse the damping -> directivity
 
 > [!TODO]
 > Multiplexing a single rotary encoder with a range of inputs
@@ -3558,3 +3557,229 @@ end
 p = plot!(size=(1250, 1250), dpi=240, background_color=:transparent, foreground_color=:gray)
 savefig(p, filename)
 ```
+
+- I'm so proud of the /learn page...
+
+- Tomorrow, I'll add the contour plot, then get started on the report + slides
+
+## Sun 14 Jul
+
+- Minor interface changes
+- Editing `/learn` content
+- Fixing carousel buttons on mobile
+
+### Seminar Slides
+
+- Starting on the slides
+
+```sh
+./elegant-underline elegant '#FF00FF' UbuntuSans-Bold 116 "A pick-ard-plare,"
+```
+
+```sh
+./elegant-underline elegant '#9E7CE1' UbuntuSans-Bold 116 "frr vapid prolotypivg"
+```
+
+## Mon 15 Jul
+
+- Working on slides/report
+
+### Seminar Presentation
+
+- The presentation needs to communicate the intent/theory behind what we're building, not what we've built
+
+- Take a photo of the 301 PCB
+- Step through the image capture/masking/centroid identification
+- Walk it through
+
+- Sketch through some ideas for the nearest target searching
+
+- Animation + video demo showing the same sequence of events + transition betewen
+
+## Tue 16 Jul
+
+- Seminar slides + demo
+
+## Wed 17 Jul
+
+- Seminar slides
+
+## Thu 18 Jul
+
+- Test boards
+- ## Fri 13 Sep
+
+- I've somewhat accepted that this logbook might be fairly scare from here on out...
+
+- This entry is being written on Saturday 14th, and is definitely not complete.
+
+- Sam and I have switched the SD card over from one Raspberry Pi to another, as the other one was mounted on Sam's head mechanism.
+- We've mounted the CM3 onto the new head.
+- We've mounted the head mechanism onto the rails.
+- The belt on the head mechanism is 👌!!
+- We've tested the vacuum nozzle with pump, and she works beautifully.
+- Sam has updated `run.sh` for the video streaming into a multi-threaded `run.jl`, which is able to composite a second video stream atop the first, ie composite the feed from the sideways-mounted camera viewing the bottom of the picked component atop the feed from the bottom-mounted camera viewing the board.
+
+- We still haven't sorted SSH out.
+- Ever since the beginning of this semester (ie since we've been employed as TAs), we've been on the staff WiFi subnet (`staff-wifi-172...`). This means that we can no longer SSH to the Raspberry Pi, at least unless we establish a wired connection over an Ethernet cable.
+- With the current head mechanism though, we cannot access the Ethernet port on the Raspberry Pi anymore.
+- Sam has set up an ngrok tunnel to `:22`, but this isn't ideal nor a permanent fix.
+
+- In theory, SSH is only required for development—everything is able to run entirely on the Pi (ie the interface, Julia socket server, video streaming). However, there is still the issue of internet access—without connecting the Pi to the internet, the STUN servers are unreachable and hence the WebRTC connection fails. This is somewhat unideal, as it means our machine cannot currently be operated offline. I was halfway through trying to set up a local STUN server, which would solve this, but didn't get very far—and it really isn't the highest priority.
+
+- Filming for Leavers' Night video
+
+## Sat 14 Sep
+
+- In to grind this out
+- My to dos:
+
+> [!TODO]
+>  - Fix gantry bug
+>  - Expand gantry code to support nozzle/pneumatics
+> - Take a new look at new gantry firmware...
+> 	- ~~Protobufs in C~~
+> 	- Nevermind. We'll scrap the new firmware. I will however think about taking the concepts and applying it to the current gantry FW, and Protobufs in CPP
+> - Calibration interface
+> 	- Test board with checkerboard/grid pattern, common pads
+> 	- See 18 July
+
+- Creating a checkerboard pattern for calibration
+![[Capture 2024-09-14 at 11.38.18.png]]
+### Calibration Process
+
+> [!IMPORTANT]
+> The key idea is that calibration happens in `socket.jl` (ie the controller)—that is the translation/adapter that sits between the interface and the gantry firmware.
+> The interface is dumb, and should only need to care about the coordinate space of its `<video>` DOM element.
+> As the bed height is potentially variable, as is the height of the board, the controller is the only component that can be expected to understand how to translate the normalised numeric data from the interface into the real-distance units for the gantry.
+
+1. Select which grid scale you are calibrating for
+2. Align the corner of a grid square exactly underneath the current camera position
+	1. Perhaps have a resizeable grid on the overlay, at least to help ensure that the grid axes are orthogonal to the camera
+
+3. Click on the grid corner immediately to the right
+	- The interface sends a `TARGET_DELTAS` message to the controller.
+4. The gantry moves to where it thinks that position is
+5. Click on where that grid corner actually went, or hit space if it is exactly correct
+	- The interface sends a `CALIBRATE_DELTAS` message to the controller, which contains the sum of the two vectors. ie, $\text{corrected} - \text{inital}$. The controller then takes this, and re-computes its scalar factors with this information.
+1. The gantry will recalculate, and move to that location
+
+2. Click on the grid corner immediately below
+3. The gantry moves to where it thinks that position is
+4. Click on where that grid corner actually went, or hit space if it is exactly correct
+5. The gantry will recalculate, and move to that location
+
+6. Repeat until satisfied
+
+![[IMG_1539.jpeg]]
+
+- Actually, I will leave the calculation of `travelledD` to the controller. This means that `CALIBRATE_DELTAS` will need to know the `targetD` too.
+
+---
+
+1. Click on a calibration point in a diagonal position
+  - The interface sends a `TARGET_DELTAS` message to the controller.
+2. The gantry moves to where it thinks that position is
+3. Click on where that point actually went, or hit space if it is exactly correct
+  - The interface sends a `CALIBRATE_DELTAS` message to the controller, which contains the target & real deltas travelled.
+4. The controller then takes this `CALIBRATE_DELTAS` payload, and re-computes its scalar factors with this information.
+
+5. Repeat until satisfied
+
+### System Architecture
+
+- Doing some repository maintenance to finally move the `socket.jl` controller to its own `p4p-83/controller` repository, video streaming to `p4p-83/vision`, etc.
+
+- https://stackoverflow.com/a/77465493 this is cool!
+
+## Sun 15 Sep
+
+### Calibration
+
+- This calibration routine works beautifully!
+- This is so good.
+- I need to update the algorithm to tell the user to calibrate diagonally, as we really want to maximise the distance if possible. If we are only calibrating in one direction, tiny errors can result in large calibration changes (ie 2 travelled pixels for a 1 pixel input would cause a 2x change!)
+- I'll correspondingly make the squares a bit bigger too.
+- I also probably don't actually want a checkerboard, but rather some nice distinct fiducials/similar.
+
+### Head
+
+- Creating the new PlatformIO project for the head
+- This will be basically the same as the gantry, but just for the head
+- The idea is that the gantry and head are independent, and should be driven separately by the controller
+- I will implement protobufs on this head, so that I can copy it over to the gantry
+
+- Huh, okay, so Sam's stepper shield works with [Grbl](https://github.com/gnea/grbl)... this looks interesting
+- At least it is well documented... I'll give it a read and consider it
+- If it is well documented, then it will definitely be faster than writing anything myself
+
+- Flashing grbl
+- Just following https://github.com/gnea/grbl/wiki/Compiling-Grbl#if-you-are-using-arduino-ide-2x
+- Had to swap the cable because I kept getting
+```
+avrdude: stk500_cmd(): programmer is out of sync
+```
+
+- Right, I think I have grbl flashed.
+- Tomorrow morning, I'll crimp the headers onto the stepper and give it a crack.
+- I'll need to check the datasheet on mecha4makers to get its operating voltage.
+- In theory, I can attach the vacuum pump as one of Grbl's special spindle/etc pins, in which case _there is no_ `p4p-83/head`. It'll all just be G-code from the controller to Grbl.
+
+## Mon 16 Sep
+
+- Working on the test boards, but not very consistently... a few minutes at a time.
+- Will do the Grbl now
+
+- I'll do a 555 timer LED oscillator circuit (like the Voltera's hello world board) as the circuit
+
+- I have the stepper spinning with Grbl!
+
+### Tue 17 Sep
+
+- Finishing the test board
+
+The board contains variably-spaced fiducial markings to be used in the machine's calibration routine, and a basic operational amplifier oscillator circuit that flashes an array of LEDs when excited with a nine-volt battery.
+
+![[Pasted image 20240917164426.png]]
+
+![[Pasted image 20240917155210.png]]
+
+![[Pasted image 20240917155202.png]]
+
+- Will continue to work on steppers with Grbl
+
+### Wed 18 Sep
+
+- Kavitha submitted the PCB order this morning
+- She accidentally paid for the Leavers' Tickets too... the incomplete Leavers' Tickets...
+- Spending a lot of time today to fix that problem
+- Also SSCC meeting/chat to Kevin... busy day
+- Systems strategising with Lucy till 2.30 am
+
+- Crimping another stepper connector and connecting the head steppers to Grbl
+- She moves!
+- I didn't get very far though, just a few `G1 Y0.2 F50`s
+
+### Thu 19 Sep
+
+- Reading https://3dtechworks.ca/2020/02/12/grbl-settings-and-calibration/ to properly learn how Grbl works
+- I will update `controller.jl`to start writing to the head
+
+### Fri 20 Sep
+
+- Will try to run the gantry with relative coordinates instead of absolute coordinates. This should avoid the issues of bounds checking, where a limit switch is hit such that the current position is written outside of the working range, causing future movement commands to completely break.
+
+### Sat 21 Sep
+
+- Let's just try to get this bloody machine working.
+- Adding messages between interface and controller for head operations.
+- Also passing machine state back to the frontend and adding a HUD for it.
+- Switching the vacuum using `M7` and `M9` coolant controls
+
+https://photos.app.goo.gl/wXHyF1tJWszJSF928
+- An up day.
+
+### Sun 22 Sep
+
+- Adding `ROTATE_NOZZLE` message
+- Rotation is working!!! Mean!!!!
