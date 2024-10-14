@@ -1,5 +1,7 @@
-# Ignore Literature Review
+# Ignore Deliverables
 lrsri/
+progress/
+final/
 
 ## Ignore Mac and windows files
 .DS_Store
