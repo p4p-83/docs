@@ -757,8 +757,8 @@ sudo diskutil unmount /Volumes/rpi
 - Talking with Sam after our Power E test... he has a new idea (vim-like navigation; enter `w` to move to the next pad above, `d` to move to the next pad to the right, etc.
 - Hm.... this is actually a good point... why are we making the user need to 'drag' (in his words), or joystick-like-navigate to the pad of interest at all?
 - I suppose it initially made sense when we were dealing with a joystick, and particularly when we were dealing with a _haptic_ joystick.
-- Now that we've ditched the keyboard, however, does this really make sense?
-- The analogy of vim-like `f`, `x` navigation is _much_ closer to what we are trying to achieve, than a Minecraft-boat-like video game analogy—we necessarily have a finite set of discrete points to which the user may be trying to place the component down on to—whereas Minecraft boat navigation is (pseudo-)continuous. Yes, there may be flowing water attempting to pull the user into a steady-state position, but, in our case _we aren't interested in all of the intermediate positions_—the user would be wanting to simply teleport directly to the pad of interest.
+- Now that we've ditched the joystick, however, does this really make sense?
+- The analogy of vim-like `f`, `t` navigation is _much_ closer to what we are trying to achieve, than a Minecraft-boat-like video game analogy—we necessarily have a finite set of discrete points to which the user may be trying to place the component down on to—whereas Minecraft boat navigation is (pseudo-)continuous. Yes, there may be flowing water attempting to pull the user into a steady-state position, but, in our case _we aren't interested in all of the intermediate positions_—the user would be wanting to simply teleport directly to the pad of interest.
 - This does eliminate the aspect of 'shared control' that previously existed, though, I don't think that this is an issue. It means that our project is going to pivot yet again, however, I think the shared control-approach (particularly with a keyboard) was always going to be a bit of a graft.
 
 ## Sat 4 May
@@ -2014,7 +2014,7 @@ feat: :art: significantly improve `PlaceVideo` implementation
 - Fixing some lifecycle things/error handling for `PlaceVideo`
 
 - Deciding the italics on the home page...
-- Adding dynamic subitles...
+- Adding dynamic subtitles...
 - Picking a font...
 - All mission critical 😭😂
 
@@ -2048,6 +2048,9 @@ feat: :art: significantly improve `PlaceVideo` implementation
 - Getting ready for a potential move to `<canvas>`!
 
 - Looking into protobufs
+- https://ieeexplore-ieee-org.ezproxy.auckland.ac.nz/document/6784954
+- https://ieeexplore-ieee-org.ezproxy.auckland.ac.nz/document/5982183
+- https://ieeexplore-ieee-org.ezproxy.auckland.ac.nz/document/8337257
 
 ## Sat 29 Jun
 
@@ -2379,6 +2382,9 @@ end
   - I guess this just means you would take the raw hypotenuse...?
 
 #### Polar Coordinates
+
+- I'm going to stop faffing around in cartesian coordinates... it really is a polar problem. The head is centred at (0, 0) at the middle of the screen, and we are moving out in rays from that...
+- I suspect we'll be best to work in a polar coordinate space for the rotation picking ~~space~~ step. Also polar space works just fine because the origin would be relative to the current head position in theory, and the lens uses circular elements so distortion is probably best corrected for with a polar space etc etc. Back converting to Cartesian would only be required for driving the gantry, the last step (unless I'm missing something)
 
 $$
 r * ((\theta - 0^{\circ})^2 + 1)
@@ -3078,6 +3084,7 @@ savefig(p, "../interface/client/src/app/learn/static-images/targetPlotWeightedDa
 > 	- Right-align page path on Card heading (if I do that).
 > 	- Gantry pouncing without space confirmation.
 > 
+
 ### Serial Port Issues
 
 - Man, why does the `open("/dev/tty.usbserial-10", 115200)` keep failing so often with
@@ -3103,7 +3110,7 @@ Stacktrace:
 - I can't `screen` to it either... surely there is something that I'm doing wrong?
 - It claims its an OS error...
 
-	- It's _not_ just `scree -wipe`
+	- It's _not_ just `screen -wipe`
 	- Nor flipping the USB adaptor
 	- Nor plugging my MacBook in
 	- Nor starting the gantry away from (0, 0)
@@ -3607,7 +3614,8 @@ savefig(p, filename)
 ## Thu 18 Jul
 
 - Test boards
-- ## Fri 13 Sep
+
+## Fri 13 Sep
 
 - I've somewhat accepted that this logbook might be fairly scare from here on out...
 
